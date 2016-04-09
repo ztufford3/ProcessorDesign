@@ -1,0 +1,2221 @@
+Analysis & Synthesis report for Project
+Fri Apr  1 23:15:47 2016
+Quartus Prime Version 15.1.0 Build 185 10/21/2015 SJ Lite Edition
+
+
+---------------------
+; Table of Contents ;
+---------------------
+  1. Legal Notice
+  2. Analysis & Synthesis Summary
+  3. Analysis & Synthesis Settings
+  4. Parallel Compilation
+  5. Analysis & Synthesis Source Files Read
+  6. Analysis & Synthesis Resource Usage Summary
+  7. Analysis & Synthesis Resource Utilization by Entity
+  8. Analysis & Synthesis RAM Summary
+  9. Analysis & Synthesis IP Cores Summary
+ 10. Registers Removed During Synthesis
+ 11. General Register Statistics
+ 12. Inverted Register Statistics
+ 13. Registers Added for RAM Pass-Through Logic
+ 14. Multiplexer Restructuring Statistics (No Restructuring Performed)
+ 15. Source assignments for altsyncram:dmem_rtl_0|altsyncram_o4l1:auto_generated
+ 16. Parameter Settings for User Entity Instance: Top-level Entity: |Project
+ 17. Parameter Settings for User Entity Instance: Pll:myPll|Pll_0002:pll_inst|altera_pll:altera_pll_i
+ 18. Parameter Settings for Inferred Entity Instance: altsyncram:dmem_rtl_0
+ 19. altsyncram Parameter Settings by Entity Instance
+ 20. Port Connectivity Checks: "SevenSeg:ss0"
+ 21. Port Connectivity Checks: "SevenSeg:ss1"
+ 22. Port Connectivity Checks: "SevenSeg:ss2"
+ 23. Port Connectivity Checks: "SevenSeg:ss3"
+ 24. Port Connectivity Checks: "SevenSeg:ss4"
+ 25. Port Connectivity Checks: "SevenSeg:ss5"
+ 26. Post-Synthesis Netlist Statistics for Top Partition
+ 27. Elapsed Time Per Partition
+ 28. Analysis & Synthesis Messages
+
+
+
+----------------
+; Legal Notice ;
+----------------
+Copyright (C) 1991-2015 Altera Corporation. All rights reserved.
+Your use of Altera Corporation's design tools, logic functions 
+and other software and tools, and its AMPP partner logic 
+functions, and any output files from any of the foregoing 
+(including device programming or simulation files), and any 
+associated documentation or information are expressly subject 
+to the terms and conditions of the Altera Program License 
+Subscription Agreement, the Altera Quartus Prime License Agreement,
+the Altera MegaCore Function License Agreement, or other 
+applicable license agreement, including, without limitation, 
+that your use is for the sole purpose of programming logic 
+devices manufactured by Altera and sold by Altera or its 
+authorized distributors.  Please refer to the applicable 
+agreement for further details.
+
+
+
++-------------------------------------------------------------------------------+
+; Analysis & Synthesis Summary                                                  ;
++---------------------------------+---------------------------------------------+
+; Analysis & Synthesis Status     ; Successful - Fri Apr  1 23:15:47 2016       ;
+; Quartus Prime Version           ; 15.1.0 Build 185 10/21/2015 SJ Lite Edition ;
+; Revision Name                   ; Project                                     ;
+; Top-level Entity Name           ; Project                                     ;
+; Family                          ; Cyclone V                                   ;
+; Logic utilization (in ALMs)     ; N/A                                         ;
+; Total registers                 ; 1513                                        ;
+; Total pins                      ; 68                                          ;
+; Total virtual pins              ; 0                                           ;
+; Total block memory bits         ; 524,288                                     ;
+; Total DSP Blocks                ; 0                                           ;
+; Total HSSI RX PCSs              ; 0                                           ;
+; Total HSSI PMA RX Deserializers ; 0                                           ;
+; Total HSSI TX PCSs              ; 0                                           ;
+; Total HSSI PMA TX Serializers   ; 0                                           ;
+; Total PLLs                      ; 1                                           ;
+; Total DLLs                      ; 0                                           ;
++---------------------------------+---------------------------------------------+
+
+
++---------------------------------------------------------------------------------------------------------------------------+
+; Analysis & Synthesis Settings                                                                                             ;
++---------------------------------------------------------------------------------+--------------------+--------------------+
+; Option                                                                          ; Setting            ; Default Value      ;
++---------------------------------------------------------------------------------+--------------------+--------------------+
+; Device                                                                          ; 5CEBA4F23C7        ;                    ;
+; Top-level entity name                                                           ; Project            ; Project            ;
+; Family name                                                                     ; Cyclone V          ; Cyclone V          ;
+; Use smart compilation                                                           ; On                 ; Off                ;
+; Restructure Multiplexers                                                        ; Off                ; Auto               ;
+; Remove Redundant Logic Cells                                                    ; On                 ; Off                ;
+; Optimization Technique                                                          ; Speed              ; Balanced           ;
+; Pre-Mapping Resynthesis Optimization                                            ; On                 ; Off                ;
+; Enable parallel Assembler and TimeQuest Timing Analyzer during compilation      ; On                 ; On                 ;
+; Enable compact report table                                                     ; Off                ; Off                ;
+; MLAB Add Timing Constraints For Mixed-Port Feed-Through Mode Setting Don't Care ; Off                ; Off                ;
+; Create Debugging Nodes for IP Cores                                             ; Off                ; Off                ;
+; Preserve fewer node names                                                       ; On                 ; On                 ;
+; Disable OpenCore Plus hardware evaluation                                       ; Off                ; Off                ;
+; Verilog Version                                                                 ; Verilog_2001       ; Verilog_2001       ;
+; VHDL Version                                                                    ; VHDL_1993          ; VHDL_1993          ;
+; State Machine Processing                                                        ; Auto               ; Auto               ;
+; Safe State Machine                                                              ; Off                ; Off                ;
+; Extract Verilog State Machines                                                  ; On                 ; On                 ;
+; Extract VHDL State Machines                                                     ; On                 ; On                 ;
+; Ignore Verilog initial constructs                                               ; Off                ; Off                ;
+; Iteration limit for constant Verilog loops                                      ; 5000               ; 5000               ;
+; Iteration limit for non-constant Verilog loops                                  ; 250                ; 250                ;
+; Add Pass-Through Logic to Inferred RAMs                                         ; On                 ; On                 ;
+; Infer RAMs from Raw Logic                                                       ; On                 ; On                 ;
+; Parallel Synthesis                                                              ; On                 ; On                 ;
+; DSP Block Balancing                                                             ; Auto               ; Auto               ;
+; NOT Gate Push-Back                                                              ; On                 ; On                 ;
+; Power-Up Don't Care                                                             ; On                 ; On                 ;
+; Remove Duplicate Registers                                                      ; On                 ; On                 ;
+; Ignore CARRY Buffers                                                            ; Off                ; Off                ;
+; Ignore CASCADE Buffers                                                          ; Off                ; Off                ;
+; Ignore GLOBAL Buffers                                                           ; Off                ; Off                ;
+; Ignore ROW GLOBAL Buffers                                                       ; Off                ; Off                ;
+; Ignore LCELL Buffers                                                            ; Off                ; Off                ;
+; Ignore SOFT Buffers                                                             ; On                 ; On                 ;
+; Limit AHDL Integers to 32 Bits                                                  ; Off                ; Off                ;
+; Carry Chain Length                                                              ; 70                 ; 70                 ;
+; Auto Carry Chains                                                               ; On                 ; On                 ;
+; Auto Open-Drain Pins                                                            ; On                 ; On                 ;
+; Perform WYSIWYG Primitive Resynthesis                                           ; Off                ; Off                ;
+; Auto ROM Replacement                                                            ; On                 ; On                 ;
+; Auto RAM Replacement                                                            ; On                 ; On                 ;
+; Auto DSP Block Replacement                                                      ; On                 ; On                 ;
+; Auto Shift Register Replacement                                                 ; Auto               ; Auto               ;
+; Allow Shift Register Merging across Hierarchies                                 ; Auto               ; Auto               ;
+; Auto Clock Enable Replacement                                                   ; On                 ; On                 ;
+; Strict RAM Replacement                                                          ; Off                ; Off                ;
+; Allow Synchronous Control Signals                                               ; On                 ; On                 ;
+; Force Use of Synchronous Clear Signals                                          ; Off                ; Off                ;
+; Auto Resource Sharing                                                           ; Off                ; Off                ;
+; Allow Any RAM Size For Recognition                                              ; Off                ; Off                ;
+; Allow Any ROM Size For Recognition                                              ; Off                ; Off                ;
+; Allow Any Shift Register Size For Recognition                                   ; Off                ; Off                ;
+; Use LogicLock Constraints during Resource Balancing                             ; On                 ; On                 ;
+; Ignore translate_off and synthesis_off directives                               ; Off                ; Off                ;
+; Timing-Driven Synthesis                                                         ; On                 ; On                 ;
+; Report Parameter Settings                                                       ; On                 ; On                 ;
+; Report Source Assignments                                                       ; On                 ; On                 ;
+; Report Connectivity Checks                                                      ; On                 ; On                 ;
+; Ignore Maximum Fan-Out Assignments                                              ; Off                ; Off                ;
+; Synchronization Register Chain Length                                           ; 3                  ; 3                  ;
+; PowerPlay Power Optimization During Synthesis                                   ; Normal compilation ; Normal compilation ;
+; HDL message level                                                               ; Level2             ; Level2             ;
+; Suppress Register Optimization Related Messages                                 ; Off                ; Off                ;
+; Number of Removed Registers Reported in Synthesis Report                        ; 5000               ; 5000               ;
+; Number of Swept Nodes Reported in Synthesis Report                              ; 5000               ; 5000               ;
+; Number of Inverted Registers Reported in Synthesis Report                       ; 100                ; 100                ;
+; Clock MUX Protection                                                            ; On                 ; On                 ;
+; Auto Gated Clock Conversion                                                     ; Off                ; Off                ;
+; Block Design Naming                                                             ; Auto               ; Auto               ;
+; SDC constraint protection                                                       ; Off                ; Off                ;
+; Synthesis Effort                                                                ; Auto               ; Auto               ;
+; Shift Register Replacement - Allow Asynchronous Clear Signal                    ; On                 ; On                 ;
+; Analysis & Synthesis Message Level                                              ; Medium             ; Medium             ;
+; Disable Register Merging Across Hierarchies                                     ; Auto               ; Auto               ;
+; Resource Aware Inference For Block RAM                                          ; On                 ; On                 ;
+; Synthesis Seed                                                                  ; 1                  ; 1                  ;
+; Automatic Parallel Synthesis                                                    ; On                 ; On                 ;
+; Partial Reconfiguration Bitstream ID                                            ; Off                ; Off                ;
++---------------------------------------------------------------------------------+--------------------+--------------------+
+
+
+Parallel compilation was disabled, but you have multiple processors available. Enable parallel compilation to reduce compilation time.
++-------------------------------------+
+; Parallel Compilation                ;
++----------------------------+--------+
+; Processors                 ; Number ;
++----------------------------+--------+
+; Number detected on machine ; 4      ;
+; Maximum allowed            ; 1      ;
++----------------------------+--------+
+
+
++------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+; Analysis & Synthesis Source Files Read                                                                                                                                                   ;
++----------------------------------+-----------------+----------------------------------+----------------------------------------------------------------------------------------+---------+
+; File Name with User-Entered Path ; Used in Netlist ; File Type                        ; File Name with Absolute Path                                                           ; Library ;
++----------------------------------+-----------------+----------------------------------+----------------------------------------------------------------------------------------+---------+
+; Sorter3.mif                      ; yes             ; User Memory Initialization File  ; /home/adminuser/Downloads/Project3(1)_restored/Sorter3.mif                             ;         ;
+; Pll.v                            ; yes             ; User Wizard-Generated File       ; /home/adminuser/Downloads/Project3(1)_restored/Pll.v                                   ; Pll     ;
+; Pll/Pll_0002.v                   ; yes             ; User Verilog HDL File            ; /home/adminuser/Downloads/Project3(1)_restored/Pll/Pll_0002.v                          ; Pll     ;
+; Project.v                        ; yes             ; User Verilog HDL File            ; /home/adminuser/Downloads/Project3(1)_restored/Project.v                               ;         ;
+; SevenSeg.v                       ; yes             ; User Verilog HDL File            ; /home/adminuser/Downloads/Project3(1)_restored/SevenSeg.v                              ;         ;
+; Funit.v                          ; yes             ; User Verilog HDL File            ; /home/adminuser/Downloads/Project3(1)_restored/Funit.v                                 ;         ;
+; altera_pll.v                     ; yes             ; Megafunction                     ; /home/adminuser/altera_lite/15.1/quartus/libraries/megafunctions/altera_pll.v          ;         ;
+; altsyncram.tdf                   ; yes             ; Megafunction                     ; /home/adminuser/altera_lite/15.1/quartus/libraries/megafunctions/altsyncram.tdf        ;         ;
+; stratix_ram_block.inc            ; yes             ; Megafunction                     ; /home/adminuser/altera_lite/15.1/quartus/libraries/megafunctions/stratix_ram_block.inc ;         ;
+; lpm_mux.inc                      ; yes             ; Megafunction                     ; /home/adminuser/altera_lite/15.1/quartus/libraries/megafunctions/lpm_mux.inc           ;         ;
+; lpm_decode.inc                   ; yes             ; Megafunction                     ; /home/adminuser/altera_lite/15.1/quartus/libraries/megafunctions/lpm_decode.inc        ;         ;
+; aglobal151.inc                   ; yes             ; Megafunction                     ; /home/adminuser/altera_lite/15.1/quartus/libraries/megafunctions/aglobal151.inc        ;         ;
+; a_rdenreg.inc                    ; yes             ; Megafunction                     ; /home/adminuser/altera_lite/15.1/quartus/libraries/megafunctions/a_rdenreg.inc         ;         ;
+; altrom.inc                       ; yes             ; Megafunction                     ; /home/adminuser/altera_lite/15.1/quartus/libraries/megafunctions/altrom.inc            ;         ;
+; altram.inc                       ; yes             ; Megafunction                     ; /home/adminuser/altera_lite/15.1/quartus/libraries/megafunctions/altram.inc            ;         ;
+; altdpram.inc                     ; yes             ; Megafunction                     ; /home/adminuser/altera_lite/15.1/quartus/libraries/megafunctions/altdpram.inc          ;         ;
+; db/altsyncram_o4l1.tdf           ; yes             ; Auto-Generated Megafunction      ; /home/adminuser/Downloads/Project3(1)_restored/db/altsyncram_o4l1.tdf                  ;         ;
+; db/decode_5la.tdf                ; yes             ; Auto-Generated Megafunction      ; /home/adminuser/Downloads/Project3(1)_restored/db/decode_5la.tdf                       ;         ;
+; db/decode_u0a.tdf                ; yes             ; Auto-Generated Megafunction      ; /home/adminuser/Downloads/Project3(1)_restored/db/decode_u0a.tdf                       ;         ;
+; db/mux_2hb.tdf                   ; yes             ; Auto-Generated Megafunction      ; /home/adminuser/Downloads/Project3(1)_restored/db/mux_2hb.tdf                          ;         ;
++----------------------------------+-----------------+----------------------------------+----------------------------------------------------------------------------------------+---------+
+
+
++------------------------------------------------------------------------------------------------------------------+
+; Analysis & Synthesis Resource Usage Summary                                                                      ;
++---------------------------------------------+--------------------------------------------------------------------+
+; Resource                                    ; Usage                                                              ;
++---------------------------------------------+--------------------------------------------------------------------+
+; Estimate of Logic utilization (ALMs needed) ; 1421                                                               ;
+;                                             ;                                                                    ;
+; Combinational ALUT usage for logic          ; 1573                                                               ;
+;     -- 7 input functions                    ; 300                                                                ;
+;     -- 6 input functions                    ; 632                                                                ;
+;     -- 5 input functions                    ; 113                                                                ;
+;     -- 4 input functions                    ; 223                                                                ;
+;     -- <=3 input functions                  ; 305                                                                ;
+;                                             ;                                                                    ;
+; Dedicated logic registers                   ; 1513                                                               ;
+;                                             ;                                                                    ;
+; I/O pins                                    ; 68                                                                 ;
+; Total MLAB memory bits                      ; 0                                                                  ;
+; Total block memory bits                     ; 524288                                                             ;
+;                                             ;                                                                    ;
+; Total DSP Blocks                            ; 0                                                                  ;
+;                                             ;                                                                    ;
+; Total PLLs                                  ; 1                                                                  ;
+;     -- PLLs                                 ; 1                                                                  ;
+;                                             ;                                                                    ;
+; Maximum fan-out node                        ; Pll:myPll|Pll_0002:pll_inst|altera_pll:altera_pll_i|outclk_wire[0] ;
+; Maximum fan-out                             ; 1646                                                               ;
+; Total fan-out                               ; 14441                                                              ;
+; Average fan-out                             ; 4.39                                                               ;
++---------------------------------------------+--------------------------------------------------------------------+
+
+
++------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+; Analysis & Synthesis Resource Utilization by Entity                                                                                                                                                                                ;
++----------------------------------------+-------------------+--------------+-------------------+------------+------+--------------+----------------------------------------------------------------------------------+--------------+
+; Compilation Hierarchy Node             ; LC Combinationals ; LC Registers ; Block Memory Bits ; DSP Blocks ; Pins ; Virtual Pins ; Full Hierarchy Name                                                              ; Library Name ;
++----------------------------------------+-------------------+--------------+-------------------+------------+------+--------------+----------------------------------------------------------------------------------+--------------+
+; |Project                               ; 1573 (1505)       ; 1513 (1512)  ; 524288            ; 0          ; 68   ; 0            ; |Project                                                                         ; work         ;
+;    |Funit:forward|                     ; 24 (24)           ; 0 (0)        ; 0                 ; 0          ; 0    ; 0            ; |Project|Funit:forward                                                           ; work         ;
+;    |Pll:myPll|                         ; 0 (0)             ; 0 (0)        ; 0                 ; 0          ; 0    ; 0            ; |Project|Pll:myPll                                                               ; Pll          ;
+;       |Pll_0002:pll_inst|              ; 0 (0)             ; 0 (0)        ; 0                 ; 0          ; 0    ; 0            ; |Project|Pll:myPll|Pll_0002:pll_inst                                             ; Pll          ;
+;          |altera_pll:altera_pll_i|     ; 0 (0)             ; 0 (0)        ; 0                 ; 0          ; 0    ; 0            ; |Project|Pll:myPll|Pll_0002:pll_inst|altera_pll:altera_pll_i                     ; work         ;
+;    |SevenSeg:ss0|                      ; 7 (7)             ; 0 (0)        ; 0                 ; 0          ; 0    ; 0            ; |Project|SevenSeg:ss0                                                            ; work         ;
+;    |SevenSeg:ss1|                      ; 7 (7)             ; 0 (0)        ; 0                 ; 0          ; 0    ; 0            ; |Project|SevenSeg:ss1                                                            ; work         ;
+;    |SevenSeg:ss2|                      ; 7 (7)             ; 0 (0)        ; 0                 ; 0          ; 0    ; 0            ; |Project|SevenSeg:ss2                                                            ; work         ;
+;    |SevenSeg:ss3|                      ; 7 (7)             ; 0 (0)        ; 0                 ; 0          ; 0    ; 0            ; |Project|SevenSeg:ss3                                                            ; work         ;
+;    |SevenSeg:ss4|                      ; 7 (7)             ; 0 (0)        ; 0                 ; 0          ; 0    ; 0            ; |Project|SevenSeg:ss4                                                            ; work         ;
+;    |SevenSeg:ss5|                      ; 7 (7)             ; 0 (0)        ; 0                 ; 0          ; 0    ; 0            ; |Project|SevenSeg:ss5                                                            ; work         ;
+;    |altsyncram:dmem_rtl_0|             ; 2 (0)             ; 1 (0)        ; 524288            ; 0          ; 0    ; 0            ; |Project|altsyncram:dmem_rtl_0                                                   ; work         ;
+;       |altsyncram_o4l1:auto_generated| ; 2 (0)             ; 1 (1)        ; 524288            ; 0          ; 0    ; 0            ; |Project|altsyncram:dmem_rtl_0|altsyncram_o4l1:auto_generated                    ; work         ;
+;          |decode_5la:decode2|          ; 2 (2)             ; 0 (0)        ; 0                 ; 0          ; 0    ; 0            ; |Project|altsyncram:dmem_rtl_0|altsyncram_o4l1:auto_generated|decode_5la:decode2 ; work         ;
++----------------------------------------+-------------------+--------------+-------------------+------------+------+--------------+----------------------------------------------------------------------------------+--------------+
+Note: For table entries with two numbers listed, the numbers in parentheses indicate the number of resources of the given type used by the specific entity alone. The numbers listed outside of parentheses indicate the total resources of the given type used by the specific entity and all of its sub-entities in the hierarchy.
+
+
++------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+; Analysis & Synthesis RAM Summary                                                                                                                                             ;
++-----------------------------------------------------------------+------+------------------+--------------+--------------+--------------+--------------+--------+-------------+
+; Name                                                            ; Type ; Mode             ; Port A Depth ; Port A Width ; Port B Depth ; Port B Width ; Size   ; MIF         ;
++-----------------------------------------------------------------+------+------------------+--------------+--------------+--------------+--------------+--------+-------------+
+; altsyncram:dmem_rtl_0|altsyncram_o4l1:auto_generated|ALTSYNCRAM ; AUTO ; Simple Dual Port ; 16384        ; 32           ; 16384        ; 32           ; 524288 ; Sorter3.mif ;
++-----------------------------------------------------------------+------+------------------+--------------+--------------+--------------+--------------+--------+-------------+
+
+
++------------------------------------------------------------------------------------------------------+
+; Analysis & Synthesis IP Cores Summary                                                                ;
++--------+--------------+---------+--------------+--------------+--------------------+-----------------+
+; Vendor ; IP Core Name ; Version ; Release Date ; License Type ; Entity Instance    ; IP Include File ;
++--------+--------------+---------+--------------+--------------+--------------------+-----------------+
+; Altera ; altera_pll   ; 15.1    ; N/A          ; N/A          ; |Project|Pll:myPll ; Pll.v           ;
++--------+--------------+---------+--------------+--------------+--------------------+-----------------+
+
+
++-------------------------------------------------------------------------+
+; Registers Removed During Synthesis                                      ;
++------------------------------------------+------------------------------+
+; Register name                            ; Reason for Removal           ;
++------------------------------------------+------------------------------+
+; aluout_M[0]                              ; Merged with memaddr_M[0]     ;
+; aluout_M[31]                             ; Merged with memaddr_M[31]    ;
+; aluout_M[30]                             ; Merged with memaddr_M[30]    ;
+; aluout_M[29]                             ; Merged with memaddr_M[29]    ;
+; aluout_M[28]                             ; Merged with memaddr_M[28]    ;
+; aluout_M[27]                             ; Merged with memaddr_M[27]    ;
+; aluout_M[26]                             ; Merged with memaddr_M[26]    ;
+; aluout_M[25]                             ; Merged with memaddr_M[25]    ;
+; aluout_M[24]                             ; Merged with memaddr_M[24]    ;
+; aluout_M[23]                             ; Merged with memaddr_M[23]    ;
+; aluout_M[22]                             ; Merged with memaddr_M[22]    ;
+; aluout_M[21]                             ; Merged with memaddr_M[21]    ;
+; aluout_M[20]                             ; Merged with memaddr_M[20]    ;
+; aluout_M[19]                             ; Merged with memaddr_M[19]    ;
+; aluout_M[18]                             ; Merged with memaddr_M[18]    ;
+; aluout_M[17]                             ; Merged with memaddr_M[17]    ;
+; aluout_M[16]                             ; Merged with memaddr_M[16]    ;
+; aluout_M[15]                             ; Merged with memaddr_M[15]    ;
+; aluout_M[14]                             ; Merged with memaddr_M[14]    ;
+; aluout_M[13]                             ; Merged with memaddr_M[13]    ;
+; aluout_M[12]                             ; Merged with memaddr_M[12]    ;
+; aluout_M[11]                             ; Merged with memaddr_M[11]    ;
+; aluout_M[10]                             ; Merged with memaddr_M[10]    ;
+; aluout_M[9]                              ; Merged with memaddr_M[9]     ;
+; aluout_M[8]                              ; Merged with memaddr_M[8]     ;
+; aluout_M[7]                              ; Merged with memaddr_M[7]     ;
+; aluout_M[6]                              ; Merged with memaddr_M[6]     ;
+; aluout_M[5]                              ; Merged with memaddr_M[5]     ;
+; aluout_M[4]                              ; Merged with memaddr_M[4]     ;
+; aluout_M[3]                              ; Merged with memaddr_M[3]     ;
+; aluout_M[2]                              ; Merged with memaddr_M[2]     ;
+; aluout_M[1]                              ; Merged with memaddr_M[1]     ;
+; workingimm_A[16..31]                     ; Merged with workingimm_A[15] ;
+; alufunc_A[4]                             ; Lost fanout                  ;
+; regs~256                                 ; Lost fanout                  ;
+; regs~257                                 ; Lost fanout                  ;
+; regs~258                                 ; Lost fanout                  ;
+; regs~259                                 ; Lost fanout                  ;
+; regs~260                                 ; Lost fanout                  ;
+; regs~261                                 ; Lost fanout                  ;
+; regs~262                                 ; Lost fanout                  ;
+; regs~263                                 ; Lost fanout                  ;
+; regs~264                                 ; Lost fanout                  ;
+; regs~265                                 ; Lost fanout                  ;
+; regs~266                                 ; Lost fanout                  ;
+; regs~267                                 ; Lost fanout                  ;
+; regs~268                                 ; Lost fanout                  ;
+; regs~269                                 ; Lost fanout                  ;
+; regs~270                                 ; Lost fanout                  ;
+; regs~271                                 ; Lost fanout                  ;
+; regs~272                                 ; Lost fanout                  ;
+; regs~273                                 ; Lost fanout                  ;
+; regs~274                                 ; Lost fanout                  ;
+; regs~275                                 ; Lost fanout                  ;
+; regs~276                                 ; Lost fanout                  ;
+; regs~277                                 ; Lost fanout                  ;
+; regs~278                                 ; Lost fanout                  ;
+; regs~279                                 ; Lost fanout                  ;
+; regs~280                                 ; Lost fanout                  ;
+; regs~281                                 ; Lost fanout                  ;
+; regs~282                                 ; Lost fanout                  ;
+; regs~283                                 ; Lost fanout                  ;
+; regs~284                                 ; Lost fanout                  ;
+; regs~285                                 ; Lost fanout                  ;
+; regs~286                                 ; Lost fanout                  ;
+; regs~287                                 ; Lost fanout                  ;
+; regs~288                                 ; Lost fanout                  ;
+; regs~289                                 ; Lost fanout                  ;
+; regs~290                                 ; Lost fanout                  ;
+; regs~291                                 ; Lost fanout                  ;
+; regs~292                                 ; Lost fanout                  ;
+; regs~293                                 ; Lost fanout                  ;
+; regs~294                                 ; Lost fanout                  ;
+; regs~295                                 ; Lost fanout                  ;
+; regs~296                                 ; Lost fanout                  ;
+; regs~297                                 ; Lost fanout                  ;
+; regs~298                                 ; Lost fanout                  ;
+; regs~299                                 ; Lost fanout                  ;
+; regs~300                                 ; Lost fanout                  ;
+; regs~301                                 ; Lost fanout                  ;
+; regs~302                                 ; Lost fanout                  ;
+; regs~303                                 ; Lost fanout                  ;
+; regs~304                                 ; Lost fanout                  ;
+; regs~305                                 ; Lost fanout                  ;
+; regs~306                                 ; Lost fanout                  ;
+; regs~307                                 ; Lost fanout                  ;
+; regs~308                                 ; Lost fanout                  ;
+; regs~309                                 ; Lost fanout                  ;
+; regs~310                                 ; Lost fanout                  ;
+; regs~311                                 ; Lost fanout                  ;
+; regs~312                                 ; Lost fanout                  ;
+; regs~313                                 ; Lost fanout                  ;
+; regs~314                                 ; Lost fanout                  ;
+; regs~315                                 ; Lost fanout                  ;
+; regs~316                                 ; Lost fanout                  ;
+; regs~317                                 ; Lost fanout                  ;
+; regs~318                                 ; Lost fanout                  ;
+; regs~319                                 ; Lost fanout                  ;
+; regs~320                                 ; Lost fanout                  ;
+; regs~321                                 ; Lost fanout                  ;
+; regs~322                                 ; Lost fanout                  ;
+; regs~323                                 ; Lost fanout                  ;
+; regs~324                                 ; Lost fanout                  ;
+; regs~325                                 ; Lost fanout                  ;
+; regs~326                                 ; Lost fanout                  ;
+; regs~327                                 ; Lost fanout                  ;
+; regs~328                                 ; Lost fanout                  ;
+; regs~329                                 ; Lost fanout                  ;
+; regs~330                                 ; Lost fanout                  ;
+; regs~331                                 ; Lost fanout                  ;
+; regs~332                                 ; Lost fanout                  ;
+; regs~333                                 ; Lost fanout                  ;
+; regs~334                                 ; Lost fanout                  ;
+; regs~335                                 ; Lost fanout                  ;
+; regs~336                                 ; Lost fanout                  ;
+; regs~337                                 ; Lost fanout                  ;
+; regs~338                                 ; Lost fanout                  ;
+; regs~339                                 ; Lost fanout                  ;
+; regs~340                                 ; Lost fanout                  ;
+; regs~341                                 ; Lost fanout                  ;
+; regs~342                                 ; Lost fanout                  ;
+; regs~343                                 ; Lost fanout                  ;
+; regs~344                                 ; Lost fanout                  ;
+; regs~345                                 ; Lost fanout                  ;
+; regs~346                                 ; Lost fanout                  ;
+; regs~347                                 ; Lost fanout                  ;
+; regs~348                                 ; Lost fanout                  ;
+; regs~349                                 ; Lost fanout                  ;
+; regs~350                                 ; Lost fanout                  ;
+; regs~351                                 ; Lost fanout                  ;
+; regs~352                                 ; Lost fanout                  ;
+; regs~353                                 ; Lost fanout                  ;
+; regs~354                                 ; Lost fanout                  ;
+; regs~355                                 ; Lost fanout                  ;
+; regs~356                                 ; Lost fanout                  ;
+; regs~357                                 ; Lost fanout                  ;
+; regs~358                                 ; Lost fanout                  ;
+; regs~359                                 ; Lost fanout                  ;
+; regs~360                                 ; Lost fanout                  ;
+; regs~361                                 ; Lost fanout                  ;
+; regs~362                                 ; Lost fanout                  ;
+; regs~363                                 ; Lost fanout                  ;
+; regs~364                                 ; Lost fanout                  ;
+; regs~365                                 ; Lost fanout                  ;
+; regs~366                                 ; Lost fanout                  ;
+; regs~367                                 ; Lost fanout                  ;
+; regs~368                                 ; Lost fanout                  ;
+; regs~369                                 ; Lost fanout                  ;
+; regs~370                                 ; Lost fanout                  ;
+; regs~371                                 ; Lost fanout                  ;
+; regs~372                                 ; Lost fanout                  ;
+; regs~373                                 ; Lost fanout                  ;
+; regs~374                                 ; Lost fanout                  ;
+; regs~375                                 ; Lost fanout                  ;
+; regs~376                                 ; Lost fanout                  ;
+; regs~377                                 ; Lost fanout                  ;
+; regs~378                                 ; Lost fanout                  ;
+; regs~379                                 ; Lost fanout                  ;
+; regs~380                                 ; Lost fanout                  ;
+; regs~381                                 ; Lost fanout                  ;
+; regs~382                                 ; Lost fanout                  ;
+; regs~383                                 ; Lost fanout                  ;
+; regs~384                                 ; Lost fanout                  ;
+; regs~385                                 ; Lost fanout                  ;
+; regs~386                                 ; Lost fanout                  ;
+; regs~387                                 ; Lost fanout                  ;
+; regs~388                                 ; Lost fanout                  ;
+; regs~389                                 ; Lost fanout                  ;
+; regs~390                                 ; Lost fanout                  ;
+; regs~391                                 ; Lost fanout                  ;
+; regs~392                                 ; Lost fanout                  ;
+; regs~393                                 ; Lost fanout                  ;
+; regs~394                                 ; Lost fanout                  ;
+; regs~395                                 ; Lost fanout                  ;
+; regs~396                                 ; Lost fanout                  ;
+; regs~397                                 ; Lost fanout                  ;
+; regs~398                                 ; Lost fanout                  ;
+; regs~399                                 ; Lost fanout                  ;
+; regs~400                                 ; Lost fanout                  ;
+; regs~401                                 ; Lost fanout                  ;
+; regs~402                                 ; Lost fanout                  ;
+; regs~403                                 ; Lost fanout                  ;
+; regs~404                                 ; Lost fanout                  ;
+; regs~405                                 ; Lost fanout                  ;
+; regs~406                                 ; Lost fanout                  ;
+; regs~407                                 ; Lost fanout                  ;
+; regs~408                                 ; Lost fanout                  ;
+; regs~409                                 ; Lost fanout                  ;
+; regs~410                                 ; Lost fanout                  ;
+; regs~411                                 ; Lost fanout                  ;
+; regs~412                                 ; Lost fanout                  ;
+; regs~413                                 ; Lost fanout                  ;
+; regs~414                                 ; Lost fanout                  ;
+; regs~415                                 ; Lost fanout                  ;
+; regs~416                                 ; Lost fanout                  ;
+; regs~417                                 ; Lost fanout                  ;
+; regs~418                                 ; Lost fanout                  ;
+; regs~419                                 ; Lost fanout                  ;
+; regs~420                                 ; Lost fanout                  ;
+; regs~421                                 ; Lost fanout                  ;
+; regs~422                                 ; Lost fanout                  ;
+; regs~423                                 ; Lost fanout                  ;
+; regs~424                                 ; Lost fanout                  ;
+; regs~425                                 ; Lost fanout                  ;
+; regs~426                                 ; Lost fanout                  ;
+; regs~427                                 ; Lost fanout                  ;
+; regs~428                                 ; Lost fanout                  ;
+; regs~429                                 ; Lost fanout                  ;
+; regs~430                                 ; Lost fanout                  ;
+; regs~431                                 ; Lost fanout                  ;
+; regs~432                                 ; Lost fanout                  ;
+; regs~433                                 ; Lost fanout                  ;
+; regs~434                                 ; Lost fanout                  ;
+; regs~435                                 ; Lost fanout                  ;
+; regs~436                                 ; Lost fanout                  ;
+; regs~437                                 ; Lost fanout                  ;
+; regs~438                                 ; Lost fanout                  ;
+; regs~439                                 ; Lost fanout                  ;
+; regs~440                                 ; Lost fanout                  ;
+; regs~441                                 ; Lost fanout                  ;
+; regs~442                                 ; Lost fanout                  ;
+; regs~443                                 ; Lost fanout                  ;
+; regs~444                                 ; Lost fanout                  ;
+; regs~445                                 ; Lost fanout                  ;
+; regs~446                                 ; Lost fanout                  ;
+; regs~447                                 ; Lost fanout                  ;
+; regs~448                                 ; Lost fanout                  ;
+; regs~449                                 ; Lost fanout                  ;
+; regs~450                                 ; Lost fanout                  ;
+; regs~451                                 ; Lost fanout                  ;
+; regs~452                                 ; Lost fanout                  ;
+; regs~453                                 ; Lost fanout                  ;
+; regs~454                                 ; Lost fanout                  ;
+; regs~455                                 ; Lost fanout                  ;
+; regs~456                                 ; Lost fanout                  ;
+; regs~457                                 ; Lost fanout                  ;
+; regs~458                                 ; Lost fanout                  ;
+; regs~459                                 ; Lost fanout                  ;
+; regs~460                                 ; Lost fanout                  ;
+; regs~461                                 ; Lost fanout                  ;
+; regs~462                                 ; Lost fanout                  ;
+; regs~463                                 ; Lost fanout                  ;
+; regs~464                                 ; Lost fanout                  ;
+; regs~465                                 ; Lost fanout                  ;
+; regs~466                                 ; Lost fanout                  ;
+; regs~467                                 ; Lost fanout                  ;
+; regs~468                                 ; Lost fanout                  ;
+; regs~469                                 ; Lost fanout                  ;
+; regs~470                                 ; Lost fanout                  ;
+; regs~471                                 ; Lost fanout                  ;
+; regs~472                                 ; Lost fanout                  ;
+; regs~473                                 ; Lost fanout                  ;
+; regs~474                                 ; Lost fanout                  ;
+; regs~475                                 ; Lost fanout                  ;
+; regs~476                                 ; Lost fanout                  ;
+; regs~477                                 ; Lost fanout                  ;
+; regs~478                                 ; Lost fanout                  ;
+; regs~479                                 ; Lost fanout                  ;
+; regs~480                                 ; Lost fanout                  ;
+; regs~481                                 ; Lost fanout                  ;
+; regs~482                                 ; Lost fanout                  ;
+; regs~483                                 ; Lost fanout                  ;
+; regs~484                                 ; Lost fanout                  ;
+; regs~485                                 ; Lost fanout                  ;
+; regs~486                                 ; Lost fanout                  ;
+; regs~487                                 ; Lost fanout                  ;
+; regs~488                                 ; Lost fanout                  ;
+; regs~489                                 ; Lost fanout                  ;
+; regs~490                                 ; Lost fanout                  ;
+; regs~491                                 ; Lost fanout                  ;
+; regs~492                                 ; Lost fanout                  ;
+; regs~493                                 ; Lost fanout                  ;
+; regs~494                                 ; Lost fanout                  ;
+; regs~495                                 ; Lost fanout                  ;
+; regs~496                                 ; Lost fanout                  ;
+; regs~497                                 ; Lost fanout                  ;
+; regs~498                                 ; Lost fanout                  ;
+; regs~499                                 ; Lost fanout                  ;
+; regs~500                                 ; Lost fanout                  ;
+; regs~501                                 ; Lost fanout                  ;
+; regs~502                                 ; Lost fanout                  ;
+; regs~503                                 ; Lost fanout                  ;
+; regs~504                                 ; Lost fanout                  ;
+; regs~505                                 ; Lost fanout                  ;
+; regs~506                                 ; Lost fanout                  ;
+; regs~507                                 ; Lost fanout                  ;
+; regs~508                                 ; Lost fanout                  ;
+; regs~509                                 ; Lost fanout                  ;
+; regs~510                                 ; Lost fanout                  ;
+; regs~511                                 ; Lost fanout                  ;
+; regs~768                                 ; Lost fanout                  ;
+; regs~769                                 ; Lost fanout                  ;
+; regs~770                                 ; Lost fanout                  ;
+; regs~771                                 ; Lost fanout                  ;
+; regs~772                                 ; Lost fanout                  ;
+; regs~773                                 ; Lost fanout                  ;
+; regs~774                                 ; Lost fanout                  ;
+; regs~775                                 ; Lost fanout                  ;
+; regs~776                                 ; Lost fanout                  ;
+; regs~777                                 ; Lost fanout                  ;
+; regs~778                                 ; Lost fanout                  ;
+; regs~779                                 ; Lost fanout                  ;
+; regs~780                                 ; Lost fanout                  ;
+; regs~781                                 ; Lost fanout                  ;
+; regs~782                                 ; Lost fanout                  ;
+; regs~783                                 ; Lost fanout                  ;
+; regs~784                                 ; Lost fanout                  ;
+; regs~785                                 ; Lost fanout                  ;
+; regs~786                                 ; Lost fanout                  ;
+; regs~787                                 ; Lost fanout                  ;
+; regs~788                                 ; Lost fanout                  ;
+; regs~789                                 ; Lost fanout                  ;
+; regs~790                                 ; Lost fanout                  ;
+; regs~791                                 ; Lost fanout                  ;
+; regs~792                                 ; Lost fanout                  ;
+; regs~793                                 ; Lost fanout                  ;
+; regs~794                                 ; Lost fanout                  ;
+; regs~795                                 ; Lost fanout                  ;
+; regs~796                                 ; Lost fanout                  ;
+; regs~797                                 ; Lost fanout                  ;
+; regs~798                                 ; Lost fanout                  ;
+; regs~799                                 ; Lost fanout                  ;
+; regs~800                                 ; Lost fanout                  ;
+; regs~801                                 ; Lost fanout                  ;
+; regs~802                                 ; Lost fanout                  ;
+; regs~803                                 ; Lost fanout                  ;
+; regs~804                                 ; Lost fanout                  ;
+; regs~805                                 ; Lost fanout                  ;
+; regs~806                                 ; Lost fanout                  ;
+; regs~807                                 ; Lost fanout                  ;
+; regs~808                                 ; Lost fanout                  ;
+; regs~809                                 ; Lost fanout                  ;
+; regs~810                                 ; Lost fanout                  ;
+; regs~811                                 ; Lost fanout                  ;
+; regs~812                                 ; Lost fanout                  ;
+; regs~813                                 ; Lost fanout                  ;
+; regs~814                                 ; Lost fanout                  ;
+; regs~815                                 ; Lost fanout                  ;
+; regs~816                                 ; Lost fanout                  ;
+; regs~817                                 ; Lost fanout                  ;
+; regs~818                                 ; Lost fanout                  ;
+; regs~819                                 ; Lost fanout                  ;
+; regs~820                                 ; Lost fanout                  ;
+; regs~821                                 ; Lost fanout                  ;
+; regs~822                                 ; Lost fanout                  ;
+; regs~823                                 ; Lost fanout                  ;
+; regs~824                                 ; Lost fanout                  ;
+; regs~825                                 ; Lost fanout                  ;
+; regs~826                                 ; Lost fanout                  ;
+; regs~827                                 ; Lost fanout                  ;
+; regs~828                                 ; Lost fanout                  ;
+; regs~829                                 ; Lost fanout                  ;
+; regs~830                                 ; Lost fanout                  ;
+; regs~831                                 ; Lost fanout                  ;
+; regs~832                                 ; Lost fanout                  ;
+; regs~833                                 ; Lost fanout                  ;
+; regs~834                                 ; Lost fanout                  ;
+; regs~835                                 ; Lost fanout                  ;
+; regs~836                                 ; Lost fanout                  ;
+; regs~837                                 ; Lost fanout                  ;
+; regs~838                                 ; Lost fanout                  ;
+; regs~839                                 ; Lost fanout                  ;
+; regs~840                                 ; Lost fanout                  ;
+; regs~841                                 ; Lost fanout                  ;
+; regs~842                                 ; Lost fanout                  ;
+; regs~843                                 ; Lost fanout                  ;
+; regs~844                                 ; Lost fanout                  ;
+; regs~845                                 ; Lost fanout                  ;
+; regs~846                                 ; Lost fanout                  ;
+; regs~847                                 ; Lost fanout                  ;
+; regs~848                                 ; Lost fanout                  ;
+; regs~849                                 ; Lost fanout                  ;
+; regs~850                                 ; Lost fanout                  ;
+; regs~851                                 ; Lost fanout                  ;
+; regs~852                                 ; Lost fanout                  ;
+; regs~853                                 ; Lost fanout                  ;
+; regs~854                                 ; Lost fanout                  ;
+; regs~855                                 ; Lost fanout                  ;
+; regs~856                                 ; Lost fanout                  ;
+; regs~857                                 ; Lost fanout                  ;
+; regs~858                                 ; Lost fanout                  ;
+; regs~859                                 ; Lost fanout                  ;
+; regs~860                                 ; Lost fanout                  ;
+; regs~861                                 ; Lost fanout                  ;
+; regs~862                                 ; Lost fanout                  ;
+; regs~863                                 ; Lost fanout                  ;
+; regs~864                                 ; Lost fanout                  ;
+; regs~865                                 ; Lost fanout                  ;
+; regs~866                                 ; Lost fanout                  ;
+; regs~867                                 ; Lost fanout                  ;
+; regs~868                                 ; Lost fanout                  ;
+; regs~869                                 ; Lost fanout                  ;
+; regs~870                                 ; Lost fanout                  ;
+; regs~871                                 ; Lost fanout                  ;
+; regs~872                                 ; Lost fanout                  ;
+; regs~873                                 ; Lost fanout                  ;
+; regs~874                                 ; Lost fanout                  ;
+; regs~875                                 ; Lost fanout                  ;
+; regs~876                                 ; Lost fanout                  ;
+; regs~877                                 ; Lost fanout                  ;
+; regs~878                                 ; Lost fanout                  ;
+; regs~879                                 ; Lost fanout                  ;
+; regs~880                                 ; Lost fanout                  ;
+; regs~881                                 ; Lost fanout                  ;
+; regs~882                                 ; Lost fanout                  ;
+; regs~883                                 ; Lost fanout                  ;
+; regs~884                                 ; Lost fanout                  ;
+; regs~885                                 ; Lost fanout                  ;
+; regs~886                                 ; Lost fanout                  ;
+; regs~887                                 ; Lost fanout                  ;
+; regs~888                                 ; Lost fanout                  ;
+; regs~889                                 ; Lost fanout                  ;
+; regs~890                                 ; Lost fanout                  ;
+; regs~891                                 ; Lost fanout                  ;
+; regs~892                                 ; Lost fanout                  ;
+; regs~893                                 ; Lost fanout                  ;
+; regs~894                                 ; Lost fanout                  ;
+; regs~895                                 ; Lost fanout                  ;
+; regs~896                                 ; Lost fanout                  ;
+; regs~897                                 ; Lost fanout                  ;
+; regs~898                                 ; Lost fanout                  ;
+; regs~899                                 ; Lost fanout                  ;
+; regs~900                                 ; Lost fanout                  ;
+; regs~901                                 ; Lost fanout                  ;
+; regs~902                                 ; Lost fanout                  ;
+; regs~903                                 ; Lost fanout                  ;
+; regs~904                                 ; Lost fanout                  ;
+; regs~905                                 ; Lost fanout                  ;
+; regs~906                                 ; Lost fanout                  ;
+; regs~907                                 ; Lost fanout                  ;
+; regs~908                                 ; Lost fanout                  ;
+; regs~909                                 ; Lost fanout                  ;
+; regs~910                                 ; Lost fanout                  ;
+; regs~911                                 ; Lost fanout                  ;
+; regs~912                                 ; Lost fanout                  ;
+; regs~913                                 ; Lost fanout                  ;
+; regs~914                                 ; Lost fanout                  ;
+; regs~915                                 ; Lost fanout                  ;
+; regs~916                                 ; Lost fanout                  ;
+; regs~917                                 ; Lost fanout                  ;
+; regs~918                                 ; Lost fanout                  ;
+; regs~919                                 ; Lost fanout                  ;
+; regs~920                                 ; Lost fanout                  ;
+; regs~921                                 ; Lost fanout                  ;
+; regs~922                                 ; Lost fanout                  ;
+; regs~923                                 ; Lost fanout                  ;
+; regs~924                                 ; Lost fanout                  ;
+; regs~925                                 ; Lost fanout                  ;
+; regs~926                                 ; Lost fanout                  ;
+; regs~927                                 ; Lost fanout                  ;
+; regs~928                                 ; Lost fanout                  ;
+; regs~929                                 ; Lost fanout                  ;
+; regs~930                                 ; Lost fanout                  ;
+; regs~931                                 ; Lost fanout                  ;
+; regs~932                                 ; Lost fanout                  ;
+; regs~933                                 ; Lost fanout                  ;
+; regs~934                                 ; Lost fanout                  ;
+; regs~935                                 ; Lost fanout                  ;
+; regs~936                                 ; Lost fanout                  ;
+; regs~937                                 ; Lost fanout                  ;
+; regs~938                                 ; Lost fanout                  ;
+; regs~939                                 ; Lost fanout                  ;
+; regs~940                                 ; Lost fanout                  ;
+; regs~941                                 ; Lost fanout                  ;
+; regs~942                                 ; Lost fanout                  ;
+; regs~943                                 ; Lost fanout                  ;
+; regs~944                                 ; Lost fanout                  ;
+; regs~945                                 ; Lost fanout                  ;
+; regs~946                                 ; Lost fanout                  ;
+; regs~947                                 ; Lost fanout                  ;
+; regs~948                                 ; Lost fanout                  ;
+; regs~949                                 ; Lost fanout                  ;
+; regs~950                                 ; Lost fanout                  ;
+; regs~951                                 ; Lost fanout                  ;
+; regs~952                                 ; Lost fanout                  ;
+; regs~953                                 ; Lost fanout                  ;
+; regs~954                                 ; Lost fanout                  ;
+; regs~955                                 ; Lost fanout                  ;
+; regs~956                                 ; Lost fanout                  ;
+; regs~957                                 ; Lost fanout                  ;
+; regs~958                                 ; Lost fanout                  ;
+; regs~959                                 ; Lost fanout                  ;
+; regs~960                                 ; Lost fanout                  ;
+; regs~961                                 ; Lost fanout                  ;
+; regs~962                                 ; Lost fanout                  ;
+; regs~963                                 ; Lost fanout                  ;
+; regs~964                                 ; Lost fanout                  ;
+; regs~965                                 ; Lost fanout                  ;
+; regs~966                                 ; Lost fanout                  ;
+; regs~967                                 ; Lost fanout                  ;
+; regs~968                                 ; Lost fanout                  ;
+; regs~969                                 ; Lost fanout                  ;
+; regs~970                                 ; Lost fanout                  ;
+; regs~971                                 ; Lost fanout                  ;
+; regs~972                                 ; Lost fanout                  ;
+; regs~973                                 ; Lost fanout                  ;
+; regs~974                                 ; Lost fanout                  ;
+; regs~975                                 ; Lost fanout                  ;
+; regs~976                                 ; Lost fanout                  ;
+; regs~977                                 ; Lost fanout                  ;
+; regs~978                                 ; Lost fanout                  ;
+; regs~979                                 ; Lost fanout                  ;
+; regs~980                                 ; Lost fanout                  ;
+; regs~981                                 ; Lost fanout                  ;
+; regs~982                                 ; Lost fanout                  ;
+; regs~983                                 ; Lost fanout                  ;
+; regs~984                                 ; Lost fanout                  ;
+; regs~985                                 ; Lost fanout                  ;
+; regs~986                                 ; Lost fanout                  ;
+; regs~987                                 ; Lost fanout                  ;
+; regs~988                                 ; Lost fanout                  ;
+; regs~989                                 ; Lost fanout                  ;
+; regs~990                                 ; Lost fanout                  ;
+; regs~991                                 ; Lost fanout                  ;
+; regs~992                                 ; Lost fanout                  ;
+; regs~993                                 ; Lost fanout                  ;
+; regs~994                                 ; Lost fanout                  ;
+; regs~995                                 ; Lost fanout                  ;
+; regs~996                                 ; Lost fanout                  ;
+; regs~997                                 ; Lost fanout                  ;
+; regs~998                                 ; Lost fanout                  ;
+; regs~999                                 ; Lost fanout                  ;
+; regs~1000                                ; Lost fanout                  ;
+; regs~1001                                ; Lost fanout                  ;
+; regs~1002                                ; Lost fanout                  ;
+; regs~1003                                ; Lost fanout                  ;
+; regs~1004                                ; Lost fanout                  ;
+; regs~1005                                ; Lost fanout                  ;
+; regs~1006                                ; Lost fanout                  ;
+; regs~1007                                ; Lost fanout                  ;
+; regs~1008                                ; Lost fanout                  ;
+; regs~1009                                ; Lost fanout                  ;
+; regs~1010                                ; Lost fanout                  ;
+; regs~1011                                ; Lost fanout                  ;
+; regs~1012                                ; Lost fanout                  ;
+; regs~1013                                ; Lost fanout                  ;
+; regs~1014                                ; Lost fanout                  ;
+; regs~1015                                ; Lost fanout                  ;
+; regs~1016                                ; Lost fanout                  ;
+; regs~1017                                ; Lost fanout                  ;
+; regs~1018                                ; Lost fanout                  ;
+; regs~1019                                ; Lost fanout                  ;
+; regs~1020                                ; Lost fanout                  ;
+; regs~1021                                ; Lost fanout                  ;
+; regs~1022                                ; Lost fanout                  ;
+; regs~1023                                ; Lost fanout                  ;
+; regs~1280                                ; Lost fanout                  ;
+; regs~1281                                ; Lost fanout                  ;
+; regs~1282                                ; Lost fanout                  ;
+; regs~1283                                ; Lost fanout                  ;
+; regs~1284                                ; Lost fanout                  ;
+; regs~1285                                ; Lost fanout                  ;
+; regs~1286                                ; Lost fanout                  ;
+; regs~1287                                ; Lost fanout                  ;
+; regs~1288                                ; Lost fanout                  ;
+; regs~1289                                ; Lost fanout                  ;
+; regs~1290                                ; Lost fanout                  ;
+; regs~1291                                ; Lost fanout                  ;
+; regs~1292                                ; Lost fanout                  ;
+; regs~1293                                ; Lost fanout                  ;
+; regs~1294                                ; Lost fanout                  ;
+; regs~1295                                ; Lost fanout                  ;
+; regs~1296                                ; Lost fanout                  ;
+; regs~1297                                ; Lost fanout                  ;
+; regs~1298                                ; Lost fanout                  ;
+; regs~1299                                ; Lost fanout                  ;
+; regs~1300                                ; Lost fanout                  ;
+; regs~1301                                ; Lost fanout                  ;
+; regs~1302                                ; Lost fanout                  ;
+; regs~1303                                ; Lost fanout                  ;
+; regs~1304                                ; Lost fanout                  ;
+; regs~1305                                ; Lost fanout                  ;
+; regs~1306                                ; Lost fanout                  ;
+; regs~1307                                ; Lost fanout                  ;
+; regs~1308                                ; Lost fanout                  ;
+; regs~1309                                ; Lost fanout                  ;
+; regs~1310                                ; Lost fanout                  ;
+; regs~1311                                ; Lost fanout                  ;
+; regs~1312                                ; Lost fanout                  ;
+; regs~1313                                ; Lost fanout                  ;
+; regs~1314                                ; Lost fanout                  ;
+; regs~1315                                ; Lost fanout                  ;
+; regs~1316                                ; Lost fanout                  ;
+; regs~1317                                ; Lost fanout                  ;
+; regs~1318                                ; Lost fanout                  ;
+; regs~1319                                ; Lost fanout                  ;
+; regs~1320                                ; Lost fanout                  ;
+; regs~1321                                ; Lost fanout                  ;
+; regs~1322                                ; Lost fanout                  ;
+; regs~1323                                ; Lost fanout                  ;
+; regs~1324                                ; Lost fanout                  ;
+; regs~1325                                ; Lost fanout                  ;
+; regs~1326                                ; Lost fanout                  ;
+; regs~1327                                ; Lost fanout                  ;
+; regs~1328                                ; Lost fanout                  ;
+; regs~1329                                ; Lost fanout                  ;
+; regs~1330                                ; Lost fanout                  ;
+; regs~1331                                ; Lost fanout                  ;
+; regs~1332                                ; Lost fanout                  ;
+; regs~1333                                ; Lost fanout                  ;
+; regs~1334                                ; Lost fanout                  ;
+; regs~1335                                ; Lost fanout                  ;
+; regs~1336                                ; Lost fanout                  ;
+; regs~1337                                ; Lost fanout                  ;
+; regs~1338                                ; Lost fanout                  ;
+; regs~1339                                ; Lost fanout                  ;
+; regs~1340                                ; Lost fanout                  ;
+; regs~1341                                ; Lost fanout                  ;
+; regs~1342                                ; Lost fanout                  ;
+; regs~1343                                ; Lost fanout                  ;
+; regs~1344                                ; Lost fanout                  ;
+; regs~1345                                ; Lost fanout                  ;
+; regs~1346                                ; Lost fanout                  ;
+; regs~1347                                ; Lost fanout                  ;
+; regs~1348                                ; Lost fanout                  ;
+; regs~1349                                ; Lost fanout                  ;
+; regs~1350                                ; Lost fanout                  ;
+; regs~1351                                ; Lost fanout                  ;
+; regs~1352                                ; Lost fanout                  ;
+; regs~1353                                ; Lost fanout                  ;
+; regs~1354                                ; Lost fanout                  ;
+; regs~1355                                ; Lost fanout                  ;
+; regs~1356                                ; Lost fanout                  ;
+; regs~1357                                ; Lost fanout                  ;
+; regs~1358                                ; Lost fanout                  ;
+; regs~1359                                ; Lost fanout                  ;
+; regs~1360                                ; Lost fanout                  ;
+; regs~1361                                ; Lost fanout                  ;
+; regs~1362                                ; Lost fanout                  ;
+; regs~1363                                ; Lost fanout                  ;
+; regs~1364                                ; Lost fanout                  ;
+; regs~1365                                ; Lost fanout                  ;
+; regs~1366                                ; Lost fanout                  ;
+; regs~1367                                ; Lost fanout                  ;
+; regs~1368                                ; Lost fanout                  ;
+; regs~1369                                ; Lost fanout                  ;
+; regs~1370                                ; Lost fanout                  ;
+; regs~1371                                ; Lost fanout                  ;
+; regs~1372                                ; Lost fanout                  ;
+; regs~1373                                ; Lost fanout                  ;
+; regs~1374                                ; Lost fanout                  ;
+; regs~1375                                ; Lost fanout                  ;
+; regs~1376                                ; Lost fanout                  ;
+; regs~1377                                ; Lost fanout                  ;
+; regs~1378                                ; Lost fanout                  ;
+; regs~1379                                ; Lost fanout                  ;
+; regs~1380                                ; Lost fanout                  ;
+; regs~1381                                ; Lost fanout                  ;
+; regs~1382                                ; Lost fanout                  ;
+; regs~1383                                ; Lost fanout                  ;
+; regs~1384                                ; Lost fanout                  ;
+; regs~1385                                ; Lost fanout                  ;
+; regs~1386                                ; Lost fanout                  ;
+; regs~1387                                ; Lost fanout                  ;
+; regs~1388                                ; Lost fanout                  ;
+; regs~1389                                ; Lost fanout                  ;
+; regs~1390                                ; Lost fanout                  ;
+; regs~1391                                ; Lost fanout                  ;
+; regs~1392                                ; Lost fanout                  ;
+; regs~1393                                ; Lost fanout                  ;
+; regs~1394                                ; Lost fanout                  ;
+; regs~1395                                ; Lost fanout                  ;
+; regs~1396                                ; Lost fanout                  ;
+; regs~1397                                ; Lost fanout                  ;
+; regs~1398                                ; Lost fanout                  ;
+; regs~1399                                ; Lost fanout                  ;
+; regs~1400                                ; Lost fanout                  ;
+; regs~1401                                ; Lost fanout                  ;
+; regs~1402                                ; Lost fanout                  ;
+; regs~1403                                ; Lost fanout                  ;
+; regs~1404                                ; Lost fanout                  ;
+; regs~1405                                ; Lost fanout                  ;
+; regs~1406                                ; Lost fanout                  ;
+; regs~1407                                ; Lost fanout                  ;
+; regs~1408                                ; Lost fanout                  ;
+; regs~1409                                ; Lost fanout                  ;
+; regs~1410                                ; Lost fanout                  ;
+; regs~1411                                ; Lost fanout                  ;
+; regs~1412                                ; Lost fanout                  ;
+; regs~1413                                ; Lost fanout                  ;
+; regs~1414                                ; Lost fanout                  ;
+; regs~1415                                ; Lost fanout                  ;
+; regs~1416                                ; Lost fanout                  ;
+; regs~1417                                ; Lost fanout                  ;
+; regs~1418                                ; Lost fanout                  ;
+; regs~1419                                ; Lost fanout                  ;
+; regs~1420                                ; Lost fanout                  ;
+; regs~1421                                ; Lost fanout                  ;
+; regs~1422                                ; Lost fanout                  ;
+; regs~1423                                ; Lost fanout                  ;
+; regs~1424                                ; Lost fanout                  ;
+; regs~1425                                ; Lost fanout                  ;
+; regs~1426                                ; Lost fanout                  ;
+; regs~1427                                ; Lost fanout                  ;
+; regs~1428                                ; Lost fanout                  ;
+; regs~1429                                ; Lost fanout                  ;
+; regs~1430                                ; Lost fanout                  ;
+; regs~1431                                ; Lost fanout                  ;
+; regs~1432                                ; Lost fanout                  ;
+; regs~1433                                ; Lost fanout                  ;
+; regs~1434                                ; Lost fanout                  ;
+; regs~1435                                ; Lost fanout                  ;
+; regs~1436                                ; Lost fanout                  ;
+; regs~1437                                ; Lost fanout                  ;
+; regs~1438                                ; Lost fanout                  ;
+; regs~1439                                ; Lost fanout                  ;
+; regs~1440                                ; Lost fanout                  ;
+; regs~1441                                ; Lost fanout                  ;
+; regs~1442                                ; Lost fanout                  ;
+; regs~1443                                ; Lost fanout                  ;
+; regs~1444                                ; Lost fanout                  ;
+; regs~1445                                ; Lost fanout                  ;
+; regs~1446                                ; Lost fanout                  ;
+; regs~1447                                ; Lost fanout                  ;
+; regs~1448                                ; Lost fanout                  ;
+; regs~1449                                ; Lost fanout                  ;
+; regs~1450                                ; Lost fanout                  ;
+; regs~1451                                ; Lost fanout                  ;
+; regs~1452                                ; Lost fanout                  ;
+; regs~1453                                ; Lost fanout                  ;
+; regs~1454                                ; Lost fanout                  ;
+; regs~1455                                ; Lost fanout                  ;
+; regs~1456                                ; Lost fanout                  ;
+; regs~1457                                ; Lost fanout                  ;
+; regs~1458                                ; Lost fanout                  ;
+; regs~1459                                ; Lost fanout                  ;
+; regs~1460                                ; Lost fanout                  ;
+; regs~1461                                ; Lost fanout                  ;
+; regs~1462                                ; Lost fanout                  ;
+; regs~1463                                ; Lost fanout                  ;
+; regs~1464                                ; Lost fanout                  ;
+; regs~1465                                ; Lost fanout                  ;
+; regs~1466                                ; Lost fanout                  ;
+; regs~1467                                ; Lost fanout                  ;
+; regs~1468                                ; Lost fanout                  ;
+; regs~1469                                ; Lost fanout                  ;
+; regs~1470                                ; Lost fanout                  ;
+; regs~1471                                ; Lost fanout                  ;
+; regs~1472                                ; Lost fanout                  ;
+; regs~1473                                ; Lost fanout                  ;
+; regs~1474                                ; Lost fanout                  ;
+; regs~1475                                ; Lost fanout                  ;
+; regs~1476                                ; Lost fanout                  ;
+; regs~1477                                ; Lost fanout                  ;
+; regs~1478                                ; Lost fanout                  ;
+; regs~1479                                ; Lost fanout                  ;
+; regs~1480                                ; Lost fanout                  ;
+; regs~1481                                ; Lost fanout                  ;
+; regs~1482                                ; Lost fanout                  ;
+; regs~1483                                ; Lost fanout                  ;
+; regs~1484                                ; Lost fanout                  ;
+; regs~1485                                ; Lost fanout                  ;
+; regs~1486                                ; Lost fanout                  ;
+; regs~1487                                ; Lost fanout                  ;
+; regs~1488                                ; Lost fanout                  ;
+; regs~1489                                ; Lost fanout                  ;
+; regs~1490                                ; Lost fanout                  ;
+; regs~1491                                ; Lost fanout                  ;
+; regs~1492                                ; Lost fanout                  ;
+; regs~1493                                ; Lost fanout                  ;
+; regs~1494                                ; Lost fanout                  ;
+; regs~1495                                ; Lost fanout                  ;
+; regs~1496                                ; Lost fanout                  ;
+; regs~1497                                ; Lost fanout                  ;
+; regs~1498                                ; Lost fanout                  ;
+; regs~1499                                ; Lost fanout                  ;
+; regs~1500                                ; Lost fanout                  ;
+; regs~1501                                ; Lost fanout                  ;
+; regs~1502                                ; Lost fanout                  ;
+; regs~1503                                ; Lost fanout                  ;
+; regs~1504                                ; Lost fanout                  ;
+; regs~1505                                ; Lost fanout                  ;
+; regs~1506                                ; Lost fanout                  ;
+; regs~1507                                ; Lost fanout                  ;
+; regs~1508                                ; Lost fanout                  ;
+; regs~1509                                ; Lost fanout                  ;
+; regs~1510                                ; Lost fanout                  ;
+; regs~1511                                ; Lost fanout                  ;
+; regs~1512                                ; Lost fanout                  ;
+; regs~1513                                ; Lost fanout                  ;
+; regs~1514                                ; Lost fanout                  ;
+; regs~1515                                ; Lost fanout                  ;
+; regs~1516                                ; Lost fanout                  ;
+; regs~1517                                ; Lost fanout                  ;
+; regs~1518                                ; Lost fanout                  ;
+; regs~1519                                ; Lost fanout                  ;
+; regs~1520                                ; Lost fanout                  ;
+; regs~1521                                ; Lost fanout                  ;
+; regs~1522                                ; Lost fanout                  ;
+; regs~1523                                ; Lost fanout                  ;
+; regs~1524                                ; Lost fanout                  ;
+; regs~1525                                ; Lost fanout                  ;
+; regs~1526                                ; Lost fanout                  ;
+; regs~1527                                ; Lost fanout                  ;
+; regs~1528                                ; Lost fanout                  ;
+; regs~1529                                ; Lost fanout                  ;
+; regs~1530                                ; Lost fanout                  ;
+; regs~1531                                ; Lost fanout                  ;
+; regs~1532                                ; Lost fanout                  ;
+; regs~1533                                ; Lost fanout                  ;
+; regs~1534                                ; Lost fanout                  ;
+; regs~1535                                ; Lost fanout                  ;
+; regs~1792                                ; Lost fanout                  ;
+; regs~1793                                ; Lost fanout                  ;
+; regs~1794                                ; Lost fanout                  ;
+; regs~1795                                ; Lost fanout                  ;
+; regs~1796                                ; Lost fanout                  ;
+; regs~1797                                ; Lost fanout                  ;
+; regs~1798                                ; Lost fanout                  ;
+; regs~1799                                ; Lost fanout                  ;
+; regs~1800                                ; Lost fanout                  ;
+; regs~1801                                ; Lost fanout                  ;
+; regs~1802                                ; Lost fanout                  ;
+; regs~1803                                ; Lost fanout                  ;
+; regs~1804                                ; Lost fanout                  ;
+; regs~1805                                ; Lost fanout                  ;
+; regs~1806                                ; Lost fanout                  ;
+; regs~1807                                ; Lost fanout                  ;
+; regs~1808                                ; Lost fanout                  ;
+; regs~1809                                ; Lost fanout                  ;
+; regs~1810                                ; Lost fanout                  ;
+; regs~1811                                ; Lost fanout                  ;
+; regs~1812                                ; Lost fanout                  ;
+; regs~1813                                ; Lost fanout                  ;
+; regs~1814                                ; Lost fanout                  ;
+; regs~1815                                ; Lost fanout                  ;
+; regs~1816                                ; Lost fanout                  ;
+; regs~1817                                ; Lost fanout                  ;
+; regs~1818                                ; Lost fanout                  ;
+; regs~1819                                ; Lost fanout                  ;
+; regs~1820                                ; Lost fanout                  ;
+; regs~1821                                ; Lost fanout                  ;
+; regs~1822                                ; Lost fanout                  ;
+; regs~1823                                ; Lost fanout                  ;
+; regs~1824                                ; Lost fanout                  ;
+; regs~1825                                ; Lost fanout                  ;
+; regs~1826                                ; Lost fanout                  ;
+; regs~1827                                ; Lost fanout                  ;
+; regs~1828                                ; Lost fanout                  ;
+; regs~1829                                ; Lost fanout                  ;
+; regs~1830                                ; Lost fanout                  ;
+; regs~1831                                ; Lost fanout                  ;
+; regs~1832                                ; Lost fanout                  ;
+; regs~1833                                ; Lost fanout                  ;
+; regs~1834                                ; Lost fanout                  ;
+; regs~1835                                ; Lost fanout                  ;
+; regs~1836                                ; Lost fanout                  ;
+; regs~1837                                ; Lost fanout                  ;
+; regs~1838                                ; Lost fanout                  ;
+; regs~1839                                ; Lost fanout                  ;
+; regs~1840                                ; Lost fanout                  ;
+; regs~1841                                ; Lost fanout                  ;
+; regs~1842                                ; Lost fanout                  ;
+; regs~1843                                ; Lost fanout                  ;
+; regs~1844                                ; Lost fanout                  ;
+; regs~1845                                ; Lost fanout                  ;
+; regs~1846                                ; Lost fanout                  ;
+; regs~1847                                ; Lost fanout                  ;
+; regs~1848                                ; Lost fanout                  ;
+; regs~1849                                ; Lost fanout                  ;
+; regs~1850                                ; Lost fanout                  ;
+; regs~1851                                ; Lost fanout                  ;
+; regs~1852                                ; Lost fanout                  ;
+; regs~1853                                ; Lost fanout                  ;
+; regs~1854                                ; Lost fanout                  ;
+; regs~1855                                ; Lost fanout                  ;
+; regs~1856                                ; Lost fanout                  ;
+; regs~1857                                ; Lost fanout                  ;
+; regs~1858                                ; Lost fanout                  ;
+; regs~1859                                ; Lost fanout                  ;
+; regs~1860                                ; Lost fanout                  ;
+; regs~1861                                ; Lost fanout                  ;
+; regs~1862                                ; Lost fanout                  ;
+; regs~1863                                ; Lost fanout                  ;
+; regs~1864                                ; Lost fanout                  ;
+; regs~1865                                ; Lost fanout                  ;
+; regs~1866                                ; Lost fanout                  ;
+; regs~1867                                ; Lost fanout                  ;
+; regs~1868                                ; Lost fanout                  ;
+; regs~1869                                ; Lost fanout                  ;
+; regs~1870                                ; Lost fanout                  ;
+; regs~1871                                ; Lost fanout                  ;
+; regs~1872                                ; Lost fanout                  ;
+; regs~1873                                ; Lost fanout                  ;
+; regs~1874                                ; Lost fanout                  ;
+; regs~1875                                ; Lost fanout                  ;
+; regs~1876                                ; Lost fanout                  ;
+; regs~1877                                ; Lost fanout                  ;
+; regs~1878                                ; Lost fanout                  ;
+; regs~1879                                ; Lost fanout                  ;
+; regs~1880                                ; Lost fanout                  ;
+; regs~1881                                ; Lost fanout                  ;
+; regs~1882                                ; Lost fanout                  ;
+; regs~1883                                ; Lost fanout                  ;
+; regs~1884                                ; Lost fanout                  ;
+; regs~1885                                ; Lost fanout                  ;
+; regs~1886                                ; Lost fanout                  ;
+; regs~1887                                ; Lost fanout                  ;
+; regs~1888                                ; Lost fanout                  ;
+; regs~1889                                ; Lost fanout                  ;
+; regs~1890                                ; Lost fanout                  ;
+; regs~1891                                ; Lost fanout                  ;
+; regs~1892                                ; Lost fanout                  ;
+; regs~1893                                ; Lost fanout                  ;
+; regs~1894                                ; Lost fanout                  ;
+; regs~1895                                ; Lost fanout                  ;
+; regs~1896                                ; Lost fanout                  ;
+; regs~1897                                ; Lost fanout                  ;
+; regs~1898                                ; Lost fanout                  ;
+; regs~1899                                ; Lost fanout                  ;
+; regs~1900                                ; Lost fanout                  ;
+; regs~1901                                ; Lost fanout                  ;
+; regs~1902                                ; Lost fanout                  ;
+; regs~1903                                ; Lost fanout                  ;
+; regs~1904                                ; Lost fanout                  ;
+; regs~1905                                ; Lost fanout                  ;
+; regs~1906                                ; Lost fanout                  ;
+; regs~1907                                ; Lost fanout                  ;
+; regs~1908                                ; Lost fanout                  ;
+; regs~1909                                ; Lost fanout                  ;
+; regs~1910                                ; Lost fanout                  ;
+; regs~1911                                ; Lost fanout                  ;
+; regs~1912                                ; Lost fanout                  ;
+; regs~1913                                ; Lost fanout                  ;
+; regs~1914                                ; Lost fanout                  ;
+; regs~1915                                ; Lost fanout                  ;
+; regs~1916                                ; Lost fanout                  ;
+; regs~1917                                ; Lost fanout                  ;
+; regs~1918                                ; Lost fanout                  ;
+; regs~1919                                ; Lost fanout                  ;
+; regs~1920                                ; Lost fanout                  ;
+; regs~1921                                ; Lost fanout                  ;
+; regs~1922                                ; Lost fanout                  ;
+; regs~1923                                ; Lost fanout                  ;
+; regs~1924                                ; Lost fanout                  ;
+; regs~1925                                ; Lost fanout                  ;
+; regs~1926                                ; Lost fanout                  ;
+; regs~1927                                ; Lost fanout                  ;
+; regs~1928                                ; Lost fanout                  ;
+; regs~1929                                ; Lost fanout                  ;
+; regs~1930                                ; Lost fanout                  ;
+; regs~1931                                ; Lost fanout                  ;
+; regs~1932                                ; Lost fanout                  ;
+; regs~1933                                ; Lost fanout                  ;
+; regs~1934                                ; Lost fanout                  ;
+; regs~1935                                ; Lost fanout                  ;
+; regs~1936                                ; Lost fanout                  ;
+; regs~1937                                ; Lost fanout                  ;
+; regs~1938                                ; Lost fanout                  ;
+; regs~1939                                ; Lost fanout                  ;
+; regs~1940                                ; Lost fanout                  ;
+; regs~1941                                ; Lost fanout                  ;
+; regs~1942                                ; Lost fanout                  ;
+; regs~1943                                ; Lost fanout                  ;
+; regs~1944                                ; Lost fanout                  ;
+; regs~1945                                ; Lost fanout                  ;
+; regs~1946                                ; Lost fanout                  ;
+; regs~1947                                ; Lost fanout                  ;
+; regs~1948                                ; Lost fanout                  ;
+; regs~1949                                ; Lost fanout                  ;
+; regs~1950                                ; Lost fanout                  ;
+; regs~1951                                ; Lost fanout                  ;
+; regs~1952                                ; Lost fanout                  ;
+; regs~1953                                ; Lost fanout                  ;
+; regs~1954                                ; Lost fanout                  ;
+; regs~1955                                ; Lost fanout                  ;
+; regs~1956                                ; Lost fanout                  ;
+; regs~1957                                ; Lost fanout                  ;
+; regs~1958                                ; Lost fanout                  ;
+; regs~1959                                ; Lost fanout                  ;
+; regs~1960                                ; Lost fanout                  ;
+; regs~1961                                ; Lost fanout                  ;
+; regs~1962                                ; Lost fanout                  ;
+; regs~1963                                ; Lost fanout                  ;
+; regs~1964                                ; Lost fanout                  ;
+; regs~1965                                ; Lost fanout                  ;
+; regs~1966                                ; Lost fanout                  ;
+; regs~1967                                ; Lost fanout                  ;
+; regs~1968                                ; Lost fanout                  ;
+; regs~1969                                ; Lost fanout                  ;
+; regs~1970                                ; Lost fanout                  ;
+; regs~1971                                ; Lost fanout                  ;
+; regs~1972                                ; Lost fanout                  ;
+; regs~1973                                ; Lost fanout                  ;
+; regs~1974                                ; Lost fanout                  ;
+; regs~1975                                ; Lost fanout                  ;
+; regs~1976                                ; Lost fanout                  ;
+; regs~1977                                ; Lost fanout                  ;
+; regs~1978                                ; Lost fanout                  ;
+; regs~1979                                ; Lost fanout                  ;
+; regs~1980                                ; Lost fanout                  ;
+; regs~1981                                ; Lost fanout                  ;
+; regs~1982                                ; Lost fanout                  ;
+; regs~1983                                ; Lost fanout                  ;
+; regs~1984                                ; Lost fanout                  ;
+; regs~1985                                ; Lost fanout                  ;
+; regs~1986                                ; Lost fanout                  ;
+; regs~1987                                ; Lost fanout                  ;
+; regs~1988                                ; Lost fanout                  ;
+; regs~1989                                ; Lost fanout                  ;
+; regs~1990                                ; Lost fanout                  ;
+; regs~1991                                ; Lost fanout                  ;
+; regs~1992                                ; Lost fanout                  ;
+; regs~1993                                ; Lost fanout                  ;
+; regs~1994                                ; Lost fanout                  ;
+; regs~1995                                ; Lost fanout                  ;
+; regs~1996                                ; Lost fanout                  ;
+; regs~1997                                ; Lost fanout                  ;
+; regs~1998                                ; Lost fanout                  ;
+; regs~1999                                ; Lost fanout                  ;
+; regs~2000                                ; Lost fanout                  ;
+; regs~2001                                ; Lost fanout                  ;
+; regs~2002                                ; Lost fanout                  ;
+; regs~2003                                ; Lost fanout                  ;
+; regs~2004                                ; Lost fanout                  ;
+; regs~2005                                ; Lost fanout                  ;
+; regs~2006                                ; Lost fanout                  ;
+; regs~2007                                ; Lost fanout                  ;
+; regs~2008                                ; Lost fanout                  ;
+; regs~2009                                ; Lost fanout                  ;
+; regs~2010                                ; Lost fanout                  ;
+; regs~2011                                ; Lost fanout                  ;
+; regs~2012                                ; Lost fanout                  ;
+; regs~2013                                ; Lost fanout                  ;
+; regs~2014                                ; Lost fanout                  ;
+; regs~2015                                ; Lost fanout                  ;
+; regs~2016                                ; Lost fanout                  ;
+; regs~2017                                ; Lost fanout                  ;
+; regs~2018                                ; Lost fanout                  ;
+; regs~2019                                ; Lost fanout                  ;
+; regs~2020                                ; Lost fanout                  ;
+; regs~2021                                ; Lost fanout                  ;
+; regs~2022                                ; Lost fanout                  ;
+; regs~2023                                ; Lost fanout                  ;
+; regs~2024                                ; Lost fanout                  ;
+; regs~2025                                ; Lost fanout                  ;
+; regs~2026                                ; Lost fanout                  ;
+; regs~2027                                ; Lost fanout                  ;
+; regs~2028                                ; Lost fanout                  ;
+; regs~2029                                ; Lost fanout                  ;
+; regs~2030                                ; Lost fanout                  ;
+; regs~2031                                ; Lost fanout                  ;
+; regs~2032                                ; Lost fanout                  ;
+; regs~2033                                ; Lost fanout                  ;
+; regs~2034                                ; Lost fanout                  ;
+; regs~2035                                ; Lost fanout                  ;
+; regs~2036                                ; Lost fanout                  ;
+; regs~2037                                ; Lost fanout                  ;
+; regs~2038                                ; Lost fanout                  ;
+; regs~2039                                ; Lost fanout                  ;
+; regs~2040                                ; Lost fanout                  ;
+; regs~2041                                ; Lost fanout                  ;
+; regs~2042                                ; Lost fanout                  ;
+; regs~2043                                ; Lost fanout                  ;
+; regs~2044                                ; Lost fanout                  ;
+; regs~2045                                ; Lost fanout                  ;
+; regs~2046                                ; Lost fanout                  ;
+; regs~2047                                ; Lost fanout                  ;
+; Total Number of Removed Registers = 1073 ;                              ;
++------------------------------------------+------------------------------+
+
+
++------------------------------------------------------+
+; General Register Statistics                          ;
++----------------------------------------------+-------+
+; Statistic                                    ; Value ;
++----------------------------------------------+-------+
+; Total registers                              ; 1513  ;
+; Number of registers using Synchronous Clear  ; 112   ;
+; Number of registers using Synchronous Load   ; 0     ;
+; Number of registers using Asynchronous Clear ; 24    ;
+; Number of registers using Asynchronous Load  ; 0     ;
+; Number of registers using Clock Enable       ; 1060  ;
+; Number of registers using Preset             ; 0     ;
++----------------------------------------------+-------+
+
+
++---------------------------------------------------+
+; Inverted Register Statistics                      ;
++-----------------------------------------+---------+
+; Inverted Register                       ; Fan out ;
++-----------------------------------------+---------+
+; HexOut[0]                               ; 7       ;
+; HexOut[2]                               ; 7       ;
+; HexOut[3]                               ; 7       ;
+; HexOut[5]                               ; 7       ;
+; HexOut[7]                               ; 7       ;
+; HexOut[9]                               ; 7       ;
+; HexOut[10]                              ; 7       ;
+; HexOut[11]                              ; 7       ;
+; HexOut[12]                              ; 7       ;
+; HexOut[14]                              ; 7       ;
+; HexOut[15]                              ; 7       ;
+; HexOut[17]                              ; 7       ;
+; HexOut[18]                              ; 7       ;
+; HexOut[19]                              ; 7       ;
+; HexOut[20]                              ; 7       ;
+; HexOut[21]                              ; 7       ;
+; HexOut[22]                              ; 7       ;
+; HexOut[23]                              ; 7       ;
+; PC[8]                                   ; 26      ;
+; dmem_rtl_0_bypass[30]                   ; 1       ;
+; isnop_A                                 ; 45      ;
+; isnop_W                                 ; 1       ;
+; isnop_M                                 ; 2       ;
+; dmem_rtl_0_bypass[40]                   ; 1       ;
+; dmem_rtl_0_bypass[38]                   ; 1       ;
+; dmem_rtl_0_bypass[44]                   ; 1       ;
+; dmem_rtl_0_bypass[54]                   ; 1       ;
+; dmem_rtl_0_bypass[56]                   ; 1       ;
+; dmem_rtl_0_bypass[58]                   ; 1       ;
+; dmem_rtl_0_bypass[60]                   ; 1       ;
+; dmem_rtl_0_bypass[32]                   ; 1       ;
+; dmem_rtl_0_bypass[74]                   ; 1       ;
+; dmem_rtl_0_bypass[76]                   ; 1       ;
+; dmem_rtl_0_bypass[78]                   ; 1       ;
+; dmem_rtl_0_bypass[80]                   ; 1       ;
+; dmem_rtl_0_bypass[82]                   ; 1       ;
+; dmem_rtl_0_bypass[84]                   ; 1       ;
+; dmem_rtl_0_bypass[86]                   ; 1       ;
+; dmem_rtl_0_bypass[88]                   ; 1       ;
+; dmem_rtl_0_bypass[90]                   ; 1       ;
+; dmem_rtl_0_bypass[92]                   ; 1       ;
+; dmem_rtl_0_bypass[70]                   ; 1       ;
+; dmem_rtl_0_bypass[72]                   ; 1       ;
+; dmem_rtl_0_bypass[66]                   ; 1       ;
+; dmem_rtl_0_bypass[68]                   ; 1       ;
+; dmem_rtl_0_bypass[62]                   ; 1       ;
+; dmem_rtl_0_bypass[64]                   ; 1       ;
+; dmem_rtl_0_bypass[50]                   ; 1       ;
+; dmem_rtl_0_bypass[52]                   ; 1       ;
+; dmem_rtl_0_bypass[46]                   ; 1       ;
+; dmem_rtl_0_bypass[48]                   ; 1       ;
+; dmem_rtl_0_bypass[42]                   ; 1       ;
+; dmem_rtl_0_bypass[34]                   ; 1       ;
+; dmem_rtl_0_bypass[36]                   ; 1       ;
+; Total number of inverted registers = 54 ;         ;
++-----------------------------------------+---------+
+
+
++--------------------------------------------+
+; Registers Added for RAM Pass-Through Logic ;
++-----------------------+--------------------+
+; Register Name         ; RAM Name           ;
++-----------------------+--------------------+
+; dmem_rtl_0_bypass[0]  ; dmem_rtl_0         ;
+; dmem_rtl_0_bypass[1]  ; dmem_rtl_0         ;
+; dmem_rtl_0_bypass[2]  ; dmem_rtl_0         ;
+; dmem_rtl_0_bypass[3]  ; dmem_rtl_0         ;
+; dmem_rtl_0_bypass[4]  ; dmem_rtl_0         ;
+; dmem_rtl_0_bypass[5]  ; dmem_rtl_0         ;
+; dmem_rtl_0_bypass[6]  ; dmem_rtl_0         ;
+; dmem_rtl_0_bypass[7]  ; dmem_rtl_0         ;
+; dmem_rtl_0_bypass[8]  ; dmem_rtl_0         ;
+; dmem_rtl_0_bypass[9]  ; dmem_rtl_0         ;
+; dmem_rtl_0_bypass[10] ; dmem_rtl_0         ;
+; dmem_rtl_0_bypass[11] ; dmem_rtl_0         ;
+; dmem_rtl_0_bypass[12] ; dmem_rtl_0         ;
+; dmem_rtl_0_bypass[13] ; dmem_rtl_0         ;
+; dmem_rtl_0_bypass[14] ; dmem_rtl_0         ;
+; dmem_rtl_0_bypass[15] ; dmem_rtl_0         ;
+; dmem_rtl_0_bypass[16] ; dmem_rtl_0         ;
+; dmem_rtl_0_bypass[17] ; dmem_rtl_0         ;
+; dmem_rtl_0_bypass[18] ; dmem_rtl_0         ;
+; dmem_rtl_0_bypass[19] ; dmem_rtl_0         ;
+; dmem_rtl_0_bypass[20] ; dmem_rtl_0         ;
+; dmem_rtl_0_bypass[21] ; dmem_rtl_0         ;
+; dmem_rtl_0_bypass[22] ; dmem_rtl_0         ;
+; dmem_rtl_0_bypass[23] ; dmem_rtl_0         ;
+; dmem_rtl_0_bypass[24] ; dmem_rtl_0         ;
+; dmem_rtl_0_bypass[25] ; dmem_rtl_0         ;
+; dmem_rtl_0_bypass[26] ; dmem_rtl_0         ;
+; dmem_rtl_0_bypass[27] ; dmem_rtl_0         ;
+; dmem_rtl_0_bypass[28] ; dmem_rtl_0         ;
+; dmem_rtl_0_bypass[29] ; dmem_rtl_0         ;
+; dmem_rtl_0_bypass[30] ; dmem_rtl_0         ;
+; dmem_rtl_0_bypass[31] ; dmem_rtl_0         ;
+; dmem_rtl_0_bypass[32] ; dmem_rtl_0         ;
+; dmem_rtl_0_bypass[33] ; dmem_rtl_0         ;
+; dmem_rtl_0_bypass[34] ; dmem_rtl_0         ;
+; dmem_rtl_0_bypass[35] ; dmem_rtl_0         ;
+; dmem_rtl_0_bypass[36] ; dmem_rtl_0         ;
+; dmem_rtl_0_bypass[37] ; dmem_rtl_0         ;
+; dmem_rtl_0_bypass[38] ; dmem_rtl_0         ;
+; dmem_rtl_0_bypass[39] ; dmem_rtl_0         ;
+; dmem_rtl_0_bypass[40] ; dmem_rtl_0         ;
+; dmem_rtl_0_bypass[41] ; dmem_rtl_0         ;
+; dmem_rtl_0_bypass[42] ; dmem_rtl_0         ;
+; dmem_rtl_0_bypass[43] ; dmem_rtl_0         ;
+; dmem_rtl_0_bypass[44] ; dmem_rtl_0         ;
+; dmem_rtl_0_bypass[45] ; dmem_rtl_0         ;
+; dmem_rtl_0_bypass[46] ; dmem_rtl_0         ;
+; dmem_rtl_0_bypass[47] ; dmem_rtl_0         ;
+; dmem_rtl_0_bypass[48] ; dmem_rtl_0         ;
+; dmem_rtl_0_bypass[49] ; dmem_rtl_0         ;
+; dmem_rtl_0_bypass[50] ; dmem_rtl_0         ;
+; dmem_rtl_0_bypass[51] ; dmem_rtl_0         ;
+; dmem_rtl_0_bypass[52] ; dmem_rtl_0         ;
+; dmem_rtl_0_bypass[53] ; dmem_rtl_0         ;
+; dmem_rtl_0_bypass[54] ; dmem_rtl_0         ;
+; dmem_rtl_0_bypass[55] ; dmem_rtl_0         ;
+; dmem_rtl_0_bypass[56] ; dmem_rtl_0         ;
+; dmem_rtl_0_bypass[57] ; dmem_rtl_0         ;
+; dmem_rtl_0_bypass[58] ; dmem_rtl_0         ;
+; dmem_rtl_0_bypass[59] ; dmem_rtl_0         ;
+; dmem_rtl_0_bypass[60] ; dmem_rtl_0         ;
+; dmem_rtl_0_bypass[61] ; dmem_rtl_0         ;
+; dmem_rtl_0_bypass[62] ; dmem_rtl_0         ;
+; dmem_rtl_0_bypass[63] ; dmem_rtl_0         ;
+; dmem_rtl_0_bypass[64] ; dmem_rtl_0         ;
+; dmem_rtl_0_bypass[65] ; dmem_rtl_0         ;
+; dmem_rtl_0_bypass[66] ; dmem_rtl_0         ;
+; dmem_rtl_0_bypass[67] ; dmem_rtl_0         ;
+; dmem_rtl_0_bypass[68] ; dmem_rtl_0         ;
+; dmem_rtl_0_bypass[69] ; dmem_rtl_0         ;
+; dmem_rtl_0_bypass[70] ; dmem_rtl_0         ;
+; dmem_rtl_0_bypass[71] ; dmem_rtl_0         ;
+; dmem_rtl_0_bypass[72] ; dmem_rtl_0         ;
+; dmem_rtl_0_bypass[73] ; dmem_rtl_0         ;
+; dmem_rtl_0_bypass[74] ; dmem_rtl_0         ;
+; dmem_rtl_0_bypass[75] ; dmem_rtl_0         ;
+; dmem_rtl_0_bypass[76] ; dmem_rtl_0         ;
+; dmem_rtl_0_bypass[77] ; dmem_rtl_0         ;
+; dmem_rtl_0_bypass[78] ; dmem_rtl_0         ;
+; dmem_rtl_0_bypass[79] ; dmem_rtl_0         ;
+; dmem_rtl_0_bypass[80] ; dmem_rtl_0         ;
+; dmem_rtl_0_bypass[81] ; dmem_rtl_0         ;
+; dmem_rtl_0_bypass[82] ; dmem_rtl_0         ;
+; dmem_rtl_0_bypass[83] ; dmem_rtl_0         ;
+; dmem_rtl_0_bypass[84] ; dmem_rtl_0         ;
+; dmem_rtl_0_bypass[85] ; dmem_rtl_0         ;
+; dmem_rtl_0_bypass[86] ; dmem_rtl_0         ;
+; dmem_rtl_0_bypass[87] ; dmem_rtl_0         ;
+; dmem_rtl_0_bypass[88] ; dmem_rtl_0         ;
+; dmem_rtl_0_bypass[89] ; dmem_rtl_0         ;
+; dmem_rtl_0_bypass[90] ; dmem_rtl_0         ;
+; dmem_rtl_0_bypass[91] ; dmem_rtl_0         ;
+; dmem_rtl_0_bypass[92] ; dmem_rtl_0         ;
++-----------------------+--------------------+
+
+
++------------------------------------------------------------------------------------------------------------------------------------------+
+; Multiplexer Restructuring Statistics (No Restructuring Performed)                                                                        ;
++--------------------+-----------+---------------+----------------------+------------------------+------------+----------------------------+
+; Multiplexer Inputs ; Bus Width ; Baseline Area ; Area if Restructured ; Saving if Restructured ; Registered ; Example Multiplexer Output ;
++--------------------+-----------+---------------+----------------------+------------------------+------------+----------------------------+
+; 4:1                ; 32 bits   ; 64 LEs        ; 64 LEs               ; 0 LEs                  ; Yes        ; |Project|regval2_A[6]      ;
+; 4:1                ; 32 bits   ; 64 LEs        ; 64 LEs               ; 0 LEs                  ; Yes        ; |Project|regval1_A[26]     ;
+; 3:1                ; 4 bits    ; 8 LEs         ; 8 LEs                ; 0 LEs                  ; Yes        ; |Project|selmemout_A       ;
+; 3:1                ; 5 bits    ; 10 LEs        ; 10 LEs               ; 0 LEs                  ; Yes        ; |Project|dreg_A[4]         ;
+; 3:1                ; 13 bits   ; 26 LEs        ; 0 LEs                ; 26 LEs                 ; Yes        ; |Project|workingimm_A[14]  ;
+; 3:1                ; 5 bits    ; 10 LEs        ; 10 LEs               ; 0 LEs                  ; Yes        ; |Project|wregno_A[0]       ;
+; 3:1                ; 2 bits    ; 4 LEs         ; 2 LEs                ; 2 LEs                  ; Yes        ; |Project|PC[0]             ;
+; 4:1                ; 29 bits   ; 58 LEs        ; 0 LEs                ; 58 LEs                 ; Yes        ; |Project|PC[6]             ;
+; 11:1               ; 6 bits    ; 42 LEs        ; 36 LEs               ; 6 LEs                  ; Yes        ; |Project|alufunc_A[5]      ;
+; 3:1                ; 32 bits   ; 64 LEs        ; 64 LEs               ; 0 LEs                  ; No         ; |Project|pcgood_B[10]      ;
+; 16:1               ; 5 bits    ; 50 LEs        ; 40 LEs               ; 10 LEs                 ; No         ; |Project|SevenSeg:ss0|OUT  ;
+; 16:1               ; 5 bits    ; 50 LEs        ; 40 LEs               ; 10 LEs                 ; No         ; |Project|SevenSeg:ss1|OUT  ;
+; 16:1               ; 5 bits    ; 50 LEs        ; 40 LEs               ; 10 LEs                 ; No         ; |Project|SevenSeg:ss2|OUT  ;
+; 16:1               ; 5 bits    ; 50 LEs        ; 40 LEs               ; 10 LEs                 ; No         ; |Project|SevenSeg:ss3|OUT  ;
+; 16:1               ; 5 bits    ; 50 LEs        ; 40 LEs               ; 10 LEs                 ; No         ; |Project|SevenSeg:ss4|OUT  ;
+; 16:1               ; 5 bits    ; 50 LEs        ; 40 LEs               ; 10 LEs                 ; No         ; |Project|SevenSeg:ss5|OUT  ;
+; 12:1               ; 31 bits   ; 248 LEs       ; 186 LEs              ; 62 LEs                 ; No         ; |Project|Selector23        ;
++--------------------+-----------+---------------+----------------------+------------------------+------------+----------------------------+
+
+
++-----------------------------------------------------------------------------+
+; Source assignments for altsyncram:dmem_rtl_0|altsyncram_o4l1:auto_generated ;
++---------------------------------+--------------------+------+---------------+
+; Assignment                      ; Value              ; From ; To            ;
++---------------------------------+--------------------+------+---------------+
+; OPTIMIZE_POWER_DURING_SYNTHESIS ; NORMAL_COMPILATION ; -    ; -             ;
++---------------------------------+--------------------+------+---------------+
+
+
++-------------------------------------------------------------------------+
+; Parameter Settings for User Entity Instance: Top-level Entity: |Project ;
++----------------+----------------------------------+---------------------+
+; Parameter Name ; Value                            ; Type                ;
++----------------+----------------------------------+---------------------+
+; DBITS          ; 32                               ; Signed Integer      ;
+; INSTSIZE       ; 00000000000000000000000000000100 ; Unsigned Binary     ;
+; INSTBITS       ; 32                               ; Signed Integer      ;
+; REGNOBITS      ; 6                                ; Signed Integer      ;
+; REGWORDS       ; 64                               ; Signed Integer      ;
+; IMMBITS        ; 14                               ; Signed Integer      ;
+; STARTPC        ; 00000000000000000000000100000000 ; Unsigned Binary     ;
+; ADDRHEX        ; 11111111111111111111000000000000 ; Unsigned Binary     ;
+; ADDRLEDR       ; 11111111111111111111000000100000 ; Unsigned Binary     ;
+; ADDRKEY        ; 11111111111111111111000010000000 ; Unsigned Binary     ;
+; ADDRSW         ; 11111111111111111111000010010000 ; Unsigned Binary     ;
+; IMEMINITFILE   ; Sorter3.mif                      ; String              ;
+; IMEMADDRBITS   ; 16                               ; Signed Integer      ;
+; IMEMWORDBITS   ; 2                                ; Signed Integer      ;
+; IMEMWORDS      ; 16384                            ; Signed Integer      ;
+; DMEMADDRBITS   ; 16                               ; Signed Integer      ;
+; DMEMWORDBITS   ; 2                                ; Signed Integer      ;
+; DMEMWORDS      ; 16384                            ; Signed Integer      ;
+; OP1BITS        ; 6                                ; Signed Integer      ;
+; OP1_ALUR       ; 000000                           ; Unsigned Binary     ;
+; OP1_BEQ        ; 001000                           ; Unsigned Binary     ;
+; OP1_BLT        ; 001001                           ; Unsigned Binary     ;
+; OP1_BLE        ; 001010                           ; Unsigned Binary     ;
+; OP1_BNE        ; 001011                           ; Unsigned Binary     ;
+; OP1_JAL        ; 001100                           ; Unsigned Binary     ;
+; OP1_LW         ; 010010                           ; Unsigned Binary     ;
+; OP1_SW         ; 011010                           ; Unsigned Binary     ;
+; OP1_ADDI       ; 100000                           ; Unsigned Binary     ;
+; OP1_ANDI       ; 100100                           ; Unsigned Binary     ;
+; OP1_ORI        ; 100101                           ; Unsigned Binary     ;
+; OP1_XORI       ; 100110                           ; Unsigned Binary     ;
+; OP2BITS        ; 6                                ; Signed Integer      ;
+; OP2_EQ         ; 001000                           ; Unsigned Binary     ;
+; OP2_LT         ; 001001                           ; Unsigned Binary     ;
+; OP2_LE         ; 001010                           ; Unsigned Binary     ;
+; OP2_NE         ; 001011                           ; Unsigned Binary     ;
+; OP2_ADD        ; 100000                           ; Unsigned Binary     ;
+; OP2_AND        ; 100100                           ; Unsigned Binary     ;
+; OP2_OR         ; 100101                           ; Unsigned Binary     ;
+; OP2_XOR        ; 100110                           ; Unsigned Binary     ;
+; OP2_SUB        ; 101000                           ; Unsigned Binary     ;
+; OP2_NAND       ; 101100                           ; Unsigned Binary     ;
+; OP2_NOR        ; 101101                           ; Unsigned Binary     ;
+; OP2_NXOR       ; 101110                           ; Unsigned Binary     ;
++----------------+----------------------------------+---------------------+
+Note: In order to hide this table in the UI and the text report file, please set the "Show Parameter Settings in Synthesis Report" option in "Analysis and Synthesis Settings -> More Settings" to "Off".
+
+
++--------------------------------------------------------------------------------------------------+
+; Parameter Settings for User Entity Instance: Pll:myPll|Pll_0002:pll_inst|altera_pll:altera_pll_i ;
++--------------------------------------+------------------------+----------------------------------+
+; Parameter Name                       ; Value                  ; Type                             ;
++--------------------------------------+------------------------+----------------------------------+
+; reference_clock_frequency            ; 50.0 MHz               ; String                           ;
+; fractional_vco_multiplier            ; false                  ; String                           ;
+; pll_type                             ; General                ; String                           ;
+; pll_subtype                          ; General                ; String                           ;
+; number_of_clocks                     ; 1                      ; Signed Integer                   ;
+; operation_mode                       ; direct                 ; String                           ;
+; deserialization_factor               ; 4                      ; Signed Integer                   ;
+; data_rate                            ; 0                      ; Signed Integer                   ;
+; sim_additional_refclk_cycles_to_lock ; 0                      ; Signed Integer                   ;
+; output_clock_frequency0              ; 86.000000 MHz          ; String                           ;
+; phase_shift0                         ; 0 ps                   ; String                           ;
+; duty_cycle0                          ; 50                     ; Signed Integer                   ;
+; output_clock_frequency1              ; 0 MHz                  ; String                           ;
+; phase_shift1                         ; 0 ps                   ; String                           ;
+; duty_cycle1                          ; 50                     ; Signed Integer                   ;
+; output_clock_frequency2              ; 0 MHz                  ; String                           ;
+; phase_shift2                         ; 0 ps                   ; String                           ;
+; duty_cycle2                          ; 50                     ; Signed Integer                   ;
+; output_clock_frequency3              ; 0 MHz                  ; String                           ;
+; phase_shift3                         ; 0 ps                   ; String                           ;
+; duty_cycle3                          ; 50                     ; Signed Integer                   ;
+; output_clock_frequency4              ; 0 MHz                  ; String                           ;
+; phase_shift4                         ; 0 ps                   ; String                           ;
+; duty_cycle4                          ; 50                     ; Signed Integer                   ;
+; output_clock_frequency5              ; 0 MHz                  ; String                           ;
+; phase_shift5                         ; 0 ps                   ; String                           ;
+; duty_cycle5                          ; 50                     ; Signed Integer                   ;
+; output_clock_frequency6              ; 0 MHz                  ; String                           ;
+; phase_shift6                         ; 0 ps                   ; String                           ;
+; duty_cycle6                          ; 50                     ; Signed Integer                   ;
+; output_clock_frequency7              ; 0 MHz                  ; String                           ;
+; phase_shift7                         ; 0 ps                   ; String                           ;
+; duty_cycle7                          ; 50                     ; Signed Integer                   ;
+; output_clock_frequency8              ; 0 MHz                  ; String                           ;
+; phase_shift8                         ; 0 ps                   ; String                           ;
+; duty_cycle8                          ; 50                     ; Signed Integer                   ;
+; output_clock_frequency9              ; 0 MHz                  ; String                           ;
+; phase_shift9                         ; 0 ps                   ; String                           ;
+; duty_cycle9                          ; 50                     ; Signed Integer                   ;
+; output_clock_frequency10             ; 0 MHz                  ; String                           ;
+; phase_shift10                        ; 0 ps                   ; String                           ;
+; duty_cycle10                         ; 50                     ; Signed Integer                   ;
+; output_clock_frequency11             ; 0 MHz                  ; String                           ;
+; phase_shift11                        ; 0 ps                   ; String                           ;
+; duty_cycle11                         ; 50                     ; Signed Integer                   ;
+; output_clock_frequency12             ; 0 MHz                  ; String                           ;
+; phase_shift12                        ; 0 ps                   ; String                           ;
+; duty_cycle12                         ; 50                     ; Signed Integer                   ;
+; output_clock_frequency13             ; 0 MHz                  ; String                           ;
+; phase_shift13                        ; 0 ps                   ; String                           ;
+; duty_cycle13                         ; 50                     ; Signed Integer                   ;
+; output_clock_frequency14             ; 0 MHz                  ; String                           ;
+; phase_shift14                        ; 0 ps                   ; String                           ;
+; duty_cycle14                         ; 50                     ; Signed Integer                   ;
+; output_clock_frequency15             ; 0 MHz                  ; String                           ;
+; phase_shift15                        ; 0 ps                   ; String                           ;
+; duty_cycle15                         ; 50                     ; Signed Integer                   ;
+; output_clock_frequency16             ; 0 MHz                  ; String                           ;
+; phase_shift16                        ; 0 ps                   ; String                           ;
+; duty_cycle16                         ; 50                     ; Signed Integer                   ;
+; output_clock_frequency17             ; 0 MHz                  ; String                           ;
+; phase_shift17                        ; 0 ps                   ; String                           ;
+; duty_cycle17                         ; 50                     ; Signed Integer                   ;
+; clock_name_0                         ;                        ; String                           ;
+; clock_name_1                         ;                        ; String                           ;
+; clock_name_2                         ;                        ; String                           ;
+; clock_name_3                         ;                        ; String                           ;
+; clock_name_4                         ;                        ; String                           ;
+; clock_name_5                         ;                        ; String                           ;
+; clock_name_6                         ;                        ; String                           ;
+; clock_name_7                         ;                        ; String                           ;
+; clock_name_8                         ;                        ; String                           ;
+; clock_name_global_0                  ; false                  ; String                           ;
+; clock_name_global_1                  ; false                  ; String                           ;
+; clock_name_global_2                  ; false                  ; String                           ;
+; clock_name_global_3                  ; false                  ; String                           ;
+; clock_name_global_4                  ; false                  ; String                           ;
+; clock_name_global_5                  ; false                  ; String                           ;
+; clock_name_global_6                  ; false                  ; String                           ;
+; clock_name_global_7                  ; false                  ; String                           ;
+; clock_name_global_8                  ; false                  ; String                           ;
+; m_cnt_hi_div                         ; 1                      ; Signed Integer                   ;
+; m_cnt_lo_div                         ; 1                      ; Signed Integer                   ;
+; m_cnt_bypass_en                      ; false                  ; String                           ;
+; m_cnt_odd_div_duty_en                ; false                  ; String                           ;
+; n_cnt_hi_div                         ; 1                      ; Signed Integer                   ;
+; n_cnt_lo_div                         ; 1                      ; Signed Integer                   ;
+; n_cnt_bypass_en                      ; false                  ; String                           ;
+; n_cnt_odd_div_duty_en                ; false                  ; String                           ;
+; c_cnt_hi_div0                        ; 1                      ; Signed Integer                   ;
+; c_cnt_lo_div0                        ; 1                      ; Signed Integer                   ;
+; c_cnt_bypass_en0                     ; false                  ; String                           ;
+; c_cnt_in_src0                        ; ph_mux_clk             ; String                           ;
+; c_cnt_odd_div_duty_en0               ; false                  ; String                           ;
+; c_cnt_prst0                          ; 1                      ; Signed Integer                   ;
+; c_cnt_ph_mux_prst0                   ; 0                      ; Signed Integer                   ;
+; c_cnt_hi_div1                        ; 1                      ; Signed Integer                   ;
+; c_cnt_lo_div1                        ; 1                      ; Signed Integer                   ;
+; c_cnt_bypass_en1                     ; false                  ; String                           ;
+; c_cnt_in_src1                        ; ph_mux_clk             ; String                           ;
+; c_cnt_odd_div_duty_en1               ; false                  ; String                           ;
+; c_cnt_prst1                          ; 1                      ; Signed Integer                   ;
+; c_cnt_ph_mux_prst1                   ; 0                      ; Signed Integer                   ;
+; c_cnt_hi_div2                        ; 1                      ; Signed Integer                   ;
+; c_cnt_lo_div2                        ; 1                      ; Signed Integer                   ;
+; c_cnt_bypass_en2                     ; false                  ; String                           ;
+; c_cnt_in_src2                        ; ph_mux_clk             ; String                           ;
+; c_cnt_odd_div_duty_en2               ; false                  ; String                           ;
+; c_cnt_prst2                          ; 1                      ; Signed Integer                   ;
+; c_cnt_ph_mux_prst2                   ; 0                      ; Signed Integer                   ;
+; c_cnt_hi_div3                        ; 1                      ; Signed Integer                   ;
+; c_cnt_lo_div3                        ; 1                      ; Signed Integer                   ;
+; c_cnt_bypass_en3                     ; false                  ; String                           ;
+; c_cnt_in_src3                        ; ph_mux_clk             ; String                           ;
+; c_cnt_odd_div_duty_en3               ; false                  ; String                           ;
+; c_cnt_prst3                          ; 1                      ; Signed Integer                   ;
+; c_cnt_ph_mux_prst3                   ; 0                      ; Signed Integer                   ;
+; c_cnt_hi_div4                        ; 1                      ; Signed Integer                   ;
+; c_cnt_lo_div4                        ; 1                      ; Signed Integer                   ;
+; c_cnt_bypass_en4                     ; false                  ; String                           ;
+; c_cnt_in_src4                        ; ph_mux_clk             ; String                           ;
+; c_cnt_odd_div_duty_en4               ; false                  ; String                           ;
+; c_cnt_prst4                          ; 1                      ; Signed Integer                   ;
+; c_cnt_ph_mux_prst4                   ; 0                      ; Signed Integer                   ;
+; c_cnt_hi_div5                        ; 1                      ; Signed Integer                   ;
+; c_cnt_lo_div5                        ; 1                      ; Signed Integer                   ;
+; c_cnt_bypass_en5                     ; false                  ; String                           ;
+; c_cnt_in_src5                        ; ph_mux_clk             ; String                           ;
+; c_cnt_odd_div_duty_en5               ; false                  ; String                           ;
+; c_cnt_prst5                          ; 1                      ; Signed Integer                   ;
+; c_cnt_ph_mux_prst5                   ; 0                      ; Signed Integer                   ;
+; c_cnt_hi_div6                        ; 1                      ; Signed Integer                   ;
+; c_cnt_lo_div6                        ; 1                      ; Signed Integer                   ;
+; c_cnt_bypass_en6                     ; false                  ; String                           ;
+; c_cnt_in_src6                        ; ph_mux_clk             ; String                           ;
+; c_cnt_odd_div_duty_en6               ; false                  ; String                           ;
+; c_cnt_prst6                          ; 1                      ; Signed Integer                   ;
+; c_cnt_ph_mux_prst6                   ; 0                      ; Signed Integer                   ;
+; c_cnt_hi_div7                        ; 1                      ; Signed Integer                   ;
+; c_cnt_lo_div7                        ; 1                      ; Signed Integer                   ;
+; c_cnt_bypass_en7                     ; false                  ; String                           ;
+; c_cnt_in_src7                        ; ph_mux_clk             ; String                           ;
+; c_cnt_odd_div_duty_en7               ; false                  ; String                           ;
+; c_cnt_prst7                          ; 1                      ; Signed Integer                   ;
+; c_cnt_ph_mux_prst7                   ; 0                      ; Signed Integer                   ;
+; c_cnt_hi_div8                        ; 1                      ; Signed Integer                   ;
+; c_cnt_lo_div8                        ; 1                      ; Signed Integer                   ;
+; c_cnt_bypass_en8                     ; false                  ; String                           ;
+; c_cnt_in_src8                        ; ph_mux_clk             ; String                           ;
+; c_cnt_odd_div_duty_en8               ; false                  ; String                           ;
+; c_cnt_prst8                          ; 1                      ; Signed Integer                   ;
+; c_cnt_ph_mux_prst8                   ; 0                      ; Signed Integer                   ;
+; c_cnt_hi_div9                        ; 1                      ; Signed Integer                   ;
+; c_cnt_lo_div9                        ; 1                      ; Signed Integer                   ;
+; c_cnt_bypass_en9                     ; false                  ; String                           ;
+; c_cnt_in_src9                        ; ph_mux_clk             ; String                           ;
+; c_cnt_odd_div_duty_en9               ; false                  ; String                           ;
+; c_cnt_prst9                          ; 1                      ; Signed Integer                   ;
+; c_cnt_ph_mux_prst9                   ; 0                      ; Signed Integer                   ;
+; c_cnt_hi_div10                       ; 1                      ; Signed Integer                   ;
+; c_cnt_lo_div10                       ; 1                      ; Signed Integer                   ;
+; c_cnt_bypass_en10                    ; false                  ; String                           ;
+; c_cnt_in_src10                       ; ph_mux_clk             ; String                           ;
+; c_cnt_odd_div_duty_en10              ; false                  ; String                           ;
+; c_cnt_prst10                         ; 1                      ; Signed Integer                   ;
+; c_cnt_ph_mux_prst10                  ; 0                      ; Signed Integer                   ;
+; c_cnt_hi_div11                       ; 1                      ; Signed Integer                   ;
+; c_cnt_lo_div11                       ; 1                      ; Signed Integer                   ;
+; c_cnt_bypass_en11                    ; false                  ; String                           ;
+; c_cnt_in_src11                       ; ph_mux_clk             ; String                           ;
+; c_cnt_odd_div_duty_en11              ; false                  ; String                           ;
+; c_cnt_prst11                         ; 1                      ; Signed Integer                   ;
+; c_cnt_ph_mux_prst11                  ; 0                      ; Signed Integer                   ;
+; c_cnt_hi_div12                       ; 1                      ; Signed Integer                   ;
+; c_cnt_lo_div12                       ; 1                      ; Signed Integer                   ;
+; c_cnt_bypass_en12                    ; false                  ; String                           ;
+; c_cnt_in_src12                       ; ph_mux_clk             ; String                           ;
+; c_cnt_odd_div_duty_en12              ; false                  ; String                           ;
+; c_cnt_prst12                         ; 1                      ; Signed Integer                   ;
+; c_cnt_ph_mux_prst12                  ; 0                      ; Signed Integer                   ;
+; c_cnt_hi_div13                       ; 1                      ; Signed Integer                   ;
+; c_cnt_lo_div13                       ; 1                      ; Signed Integer                   ;
+; c_cnt_bypass_en13                    ; false                  ; String                           ;
+; c_cnt_in_src13                       ; ph_mux_clk             ; String                           ;
+; c_cnt_odd_div_duty_en13              ; false                  ; String                           ;
+; c_cnt_prst13                         ; 1                      ; Signed Integer                   ;
+; c_cnt_ph_mux_prst13                  ; 0                      ; Signed Integer                   ;
+; c_cnt_hi_div14                       ; 1                      ; Signed Integer                   ;
+; c_cnt_lo_div14                       ; 1                      ; Signed Integer                   ;
+; c_cnt_bypass_en14                    ; false                  ; String                           ;
+; c_cnt_in_src14                       ; ph_mux_clk             ; String                           ;
+; c_cnt_odd_div_duty_en14              ; false                  ; String                           ;
+; c_cnt_prst14                         ; 1                      ; Signed Integer                   ;
+; c_cnt_ph_mux_prst14                  ; 0                      ; Signed Integer                   ;
+; c_cnt_hi_div15                       ; 1                      ; Signed Integer                   ;
+; c_cnt_lo_div15                       ; 1                      ; Signed Integer                   ;
+; c_cnt_bypass_en15                    ; false                  ; String                           ;
+; c_cnt_in_src15                       ; ph_mux_clk             ; String                           ;
+; c_cnt_odd_div_duty_en15              ; false                  ; String                           ;
+; c_cnt_prst15                         ; 1                      ; Signed Integer                   ;
+; c_cnt_ph_mux_prst15                  ; 0                      ; Signed Integer                   ;
+; c_cnt_hi_div16                       ; 1                      ; Signed Integer                   ;
+; c_cnt_lo_div16                       ; 1                      ; Signed Integer                   ;
+; c_cnt_bypass_en16                    ; false                  ; String                           ;
+; c_cnt_in_src16                       ; ph_mux_clk             ; String                           ;
+; c_cnt_odd_div_duty_en16              ; false                  ; String                           ;
+; c_cnt_prst16                         ; 1                      ; Signed Integer                   ;
+; c_cnt_ph_mux_prst16                  ; 0                      ; Signed Integer                   ;
+; c_cnt_hi_div17                       ; 1                      ; Signed Integer                   ;
+; c_cnt_lo_div17                       ; 1                      ; Signed Integer                   ;
+; c_cnt_bypass_en17                    ; false                  ; String                           ;
+; c_cnt_in_src17                       ; ph_mux_clk             ; String                           ;
+; c_cnt_odd_div_duty_en17              ; false                  ; String                           ;
+; c_cnt_prst17                         ; 1                      ; Signed Integer                   ;
+; c_cnt_ph_mux_prst17                  ; 0                      ; Signed Integer                   ;
+; pll_vco_div                          ; 1                      ; Signed Integer                   ;
+; pll_slf_rst                          ; false                  ; String                           ;
+; pll_bw_sel                           ; low                    ; String                           ;
+; pll_output_clk_frequency             ; 0 MHz                  ; String                           ;
+; pll_cp_current                       ; 0                      ; Signed Integer                   ;
+; pll_bwctrl                           ; 0                      ; Signed Integer                   ;
+; pll_fractional_division              ; 1                      ; Signed Integer                   ;
+; pll_fractional_cout                  ; 24                     ; Signed Integer                   ;
+; pll_dsm_out_sel                      ; 1st_order              ; String                           ;
+; mimic_fbclk_type                     ; gclk                   ; String                           ;
+; pll_fbclk_mux_1                      ; glb                    ; String                           ;
+; pll_fbclk_mux_2                      ; fb_1                   ; String                           ;
+; pll_m_cnt_in_src                     ; ph_mux_clk             ; String                           ;
+; pll_vcoph_div                        ; 1                      ; Signed Integer                   ;
+; refclk1_frequency                    ; 0 MHz                  ; String                           ;
+; pll_clkin_0_src                      ; clk_0                  ; String                           ;
+; pll_clkin_1_src                      ; clk_0                  ; String                           ;
+; pll_clk_loss_sw_en                   ; false                  ; String                           ;
+; pll_auto_clk_sw_en                   ; false                  ; String                           ;
+; pll_manu_clk_sw_en                   ; false                  ; String                           ;
+; pll_clk_sw_dly                       ; 0                      ; Signed Integer                   ;
+; pll_extclk_0_cnt_src                 ; pll_extclk_cnt_src_vss ; String                           ;
+; pll_extclk_1_cnt_src                 ; pll_extclk_cnt_src_vss ; String                           ;
++--------------------------------------+------------------------+----------------------------------+
+Note: In order to hide this table in the UI and the text report file, please set the "Show Parameter Settings in Synthesis Report" option in "Analysis and Synthesis Settings -> More Settings" to "Off".
+
+
++----------------------------------------------------------------------------+
+; Parameter Settings for Inferred Entity Instance: altsyncram:dmem_rtl_0     ;
++------------------------------------+----------------------+----------------+
+; Parameter Name                     ; Value                ; Type           ;
++------------------------------------+----------------------+----------------+
+; BYTE_SIZE_BLOCK                    ; 8                    ; Untyped        ;
+; AUTO_CARRY_CHAINS                  ; ON                   ; AUTO_CARRY     ;
+; IGNORE_CARRY_BUFFERS               ; OFF                  ; IGNORE_CARRY   ;
+; AUTO_CASCADE_CHAINS                ; ON                   ; AUTO_CASCADE   ;
+; IGNORE_CASCADE_BUFFERS             ; OFF                  ; IGNORE_CASCADE ;
+; WIDTH_BYTEENA                      ; 1                    ; Untyped        ;
+; OPERATION_MODE                     ; DUAL_PORT            ; Untyped        ;
+; WIDTH_A                            ; 32                   ; Untyped        ;
+; WIDTHAD_A                          ; 14                   ; Untyped        ;
+; NUMWORDS_A                         ; 16384                ; Untyped        ;
+; OUTDATA_REG_A                      ; UNREGISTERED         ; Untyped        ;
+; ADDRESS_ACLR_A                     ; NONE                 ; Untyped        ;
+; OUTDATA_ACLR_A                     ; NONE                 ; Untyped        ;
+; WRCONTROL_ACLR_A                   ; NONE                 ; Untyped        ;
+; INDATA_ACLR_A                      ; NONE                 ; Untyped        ;
+; BYTEENA_ACLR_A                     ; NONE                 ; Untyped        ;
+; WIDTH_B                            ; 32                   ; Untyped        ;
+; WIDTHAD_B                          ; 14                   ; Untyped        ;
+; NUMWORDS_B                         ; 16384                ; Untyped        ;
+; INDATA_REG_B                       ; CLOCK1               ; Untyped        ;
+; WRCONTROL_WRADDRESS_REG_B          ; CLOCK1               ; Untyped        ;
+; RDCONTROL_REG_B                    ; CLOCK1               ; Untyped        ;
+; ADDRESS_REG_B                      ; CLOCK0               ; Untyped        ;
+; OUTDATA_REG_B                      ; UNREGISTERED         ; Untyped        ;
+; BYTEENA_REG_B                      ; CLOCK1               ; Untyped        ;
+; INDATA_ACLR_B                      ; NONE                 ; Untyped        ;
+; WRCONTROL_ACLR_B                   ; NONE                 ; Untyped        ;
+; ADDRESS_ACLR_B                     ; NONE                 ; Untyped        ;
+; OUTDATA_ACLR_B                     ; NONE                 ; Untyped        ;
+; RDCONTROL_ACLR_B                   ; NONE                 ; Untyped        ;
+; BYTEENA_ACLR_B                     ; NONE                 ; Untyped        ;
+; WIDTH_BYTEENA_A                    ; 1                    ; Untyped        ;
+; WIDTH_BYTEENA_B                    ; 1                    ; Untyped        ;
+; RAM_BLOCK_TYPE                     ; AUTO                 ; Untyped        ;
+; BYTE_SIZE                          ; 8                    ; Untyped        ;
+; READ_DURING_WRITE_MODE_MIXED_PORTS ; DONT_CARE            ; Untyped        ;
+; READ_DURING_WRITE_MODE_PORT_A      ; NEW_DATA_NO_NBE_READ ; Untyped        ;
+; READ_DURING_WRITE_MODE_PORT_B      ; NEW_DATA_NO_NBE_READ ; Untyped        ;
+; INIT_FILE                          ; Sorter3.mif          ; Untyped        ;
+; INIT_FILE_LAYOUT                   ; PORT_A               ; Untyped        ;
+; MAXIMUM_DEPTH                      ; 0                    ; Untyped        ;
+; CLOCK_ENABLE_INPUT_A               ; NORMAL               ; Untyped        ;
+; CLOCK_ENABLE_INPUT_B               ; NORMAL               ; Untyped        ;
+; CLOCK_ENABLE_OUTPUT_A              ; NORMAL               ; Untyped        ;
+; CLOCK_ENABLE_OUTPUT_B              ; NORMAL               ; Untyped        ;
+; CLOCK_ENABLE_CORE_A                ; USE_INPUT_CLKEN      ; Untyped        ;
+; CLOCK_ENABLE_CORE_B                ; USE_INPUT_CLKEN      ; Untyped        ;
+; ENABLE_ECC                         ; FALSE                ; Untyped        ;
+; ECC_PIPELINE_STAGE_ENABLED         ; FALSE                ; Untyped        ;
+; WIDTH_ECCSTATUS                    ; 3                    ; Untyped        ;
+; DEVICE_FAMILY                      ; Cyclone V            ; Untyped        ;
+; CBXI_PARAMETER                     ; altsyncram_o4l1      ; Untyped        ;
++------------------------------------+----------------------+----------------+
+Note: In order to hide this table in the UI and the text report file, please set the "Show Parameter Settings in Synthesis Report" option in "Analysis and Synthesis Settings -> More Settings" to "Off".
+
+
++-------------------------------------------------------------------+
+; altsyncram Parameter Settings by Entity Instance                  ;
++-------------------------------------------+-----------------------+
+; Name                                      ; Value                 ;
++-------------------------------------------+-----------------------+
+; Number of entity instances                ; 1                     ;
+; Entity Instance                           ; altsyncram:dmem_rtl_0 ;
+;     -- OPERATION_MODE                     ; DUAL_PORT             ;
+;     -- WIDTH_A                            ; 32                    ;
+;     -- NUMWORDS_A                         ; 16384                 ;
+;     -- OUTDATA_REG_A                      ; UNREGISTERED          ;
+;     -- WIDTH_B                            ; 32                    ;
+;     -- NUMWORDS_B                         ; 16384                 ;
+;     -- ADDRESS_REG_B                      ; CLOCK0                ;
+;     -- OUTDATA_REG_B                      ; UNREGISTERED          ;
+;     -- RAM_BLOCK_TYPE                     ; AUTO                  ;
+;     -- READ_DURING_WRITE_MODE_MIXED_PORTS ; DONT_CARE             ;
++-------------------------------------------+-----------------------+
+
+
++------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+; Port Connectivity Checks: "SevenSeg:ss0"                                                                                                                               ;
++------+-------+----------+----------------------------------------------------------------------------------------------------------------------------------------------+
+; Port ; Type  ; Severity ; Details                                                                                                                                      ;
++------+-------+----------+----------------------------------------------------------------------------------------------------------------------------------------------+
+; OFF  ; Input ; Warning  ; Declared by entity but not connected by instance. If a default value exists, it will be used.  Otherwise, the port will be connected to GND. ;
++------+-------+----------+----------------------------------------------------------------------------------------------------------------------------------------------+
+
+
++------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+; Port Connectivity Checks: "SevenSeg:ss1"                                                                                                                               ;
++------+-------+----------+----------------------------------------------------------------------------------------------------------------------------------------------+
+; Port ; Type  ; Severity ; Details                                                                                                                                      ;
++------+-------+----------+----------------------------------------------------------------------------------------------------------------------------------------------+
+; OFF  ; Input ; Warning  ; Declared by entity but not connected by instance. If a default value exists, it will be used.  Otherwise, the port will be connected to GND. ;
++------+-------+----------+----------------------------------------------------------------------------------------------------------------------------------------------+
+
+
++------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+; Port Connectivity Checks: "SevenSeg:ss2"                                                                                                                               ;
++------+-------+----------+----------------------------------------------------------------------------------------------------------------------------------------------+
+; Port ; Type  ; Severity ; Details                                                                                                                                      ;
++------+-------+----------+----------------------------------------------------------------------------------------------------------------------------------------------+
+; OFF  ; Input ; Warning  ; Declared by entity but not connected by instance. If a default value exists, it will be used.  Otherwise, the port will be connected to GND. ;
++------+-------+----------+----------------------------------------------------------------------------------------------------------------------------------------------+
+
+
++------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+; Port Connectivity Checks: "SevenSeg:ss3"                                                                                                                               ;
++------+-------+----------+----------------------------------------------------------------------------------------------------------------------------------------------+
+; Port ; Type  ; Severity ; Details                                                                                                                                      ;
++------+-------+----------+----------------------------------------------------------------------------------------------------------------------------------------------+
+; OFF  ; Input ; Warning  ; Declared by entity but not connected by instance. If a default value exists, it will be used.  Otherwise, the port will be connected to GND. ;
++------+-------+----------+----------------------------------------------------------------------------------------------------------------------------------------------+
+
+
++------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+; Port Connectivity Checks: "SevenSeg:ss4"                                                                                                                               ;
++------+-------+----------+----------------------------------------------------------------------------------------------------------------------------------------------+
+; Port ; Type  ; Severity ; Details                                                                                                                                      ;
++------+-------+----------+----------------------------------------------------------------------------------------------------------------------------------------------+
+; OFF  ; Input ; Warning  ; Declared by entity but not connected by instance. If a default value exists, it will be used.  Otherwise, the port will be connected to GND. ;
++------+-------+----------+----------------------------------------------------------------------------------------------------------------------------------------------+
+
+
++------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+; Port Connectivity Checks: "SevenSeg:ss5"                                                                                                                               ;
++------+-------+----------+----------------------------------------------------------------------------------------------------------------------------------------------+
+; Port ; Type  ; Severity ; Details                                                                                                                                      ;
++------+-------+----------+----------------------------------------------------------------------------------------------------------------------------------------------+
+; OFF  ; Input ; Warning  ; Declared by entity but not connected by instance. If a default value exists, it will be used.  Otherwise, the port will be connected to GND. ;
++------+-------+----------+----------------------------------------------------------------------------------------------------------------------------------------------+
+
+
++-----------------------------------------------------+
+; Post-Synthesis Netlist Statistics for Top Partition ;
++-----------------------+-----------------------------+
+; Type                  ; Count                       ;
++-----------------------+-----------------------------+
+; arriav_ff             ; 1513                        ;
+;     ENA               ; 1036                        ;
+;     ENA CLR           ; 24                          ;
+;     SCLR              ; 112                         ;
+;     plain             ; 341                         ;
+; arriav_lcell_comb     ; 1579                        ;
+;     arith             ; 159                         ;
+;         0 data inputs ; 1                           ;
+;         1 data inputs ; 30                          ;
+;         2 data inputs ; 64                          ;
+;         4 data inputs ; 64                          ;
+;     extend            ; 300                         ;
+;         7 data inputs ; 300                         ;
+;     normal            ; 1120                        ;
+;         1 data inputs ; 25                          ;
+;         2 data inputs ; 21                          ;
+;         3 data inputs ; 170                         ;
+;         4 data inputs ; 159                         ;
+;         5 data inputs ; 113                         ;
+;         6 data inputs ; 632                         ;
+; boundary_port         ; 68                          ;
+; generic_pll           ; 1                           ;
+; stratixv_ram_block    ; 64                          ;
+;                       ;                             ;
+; Max LUT depth         ; 12.60                       ;
+; Average LUT depth     ; 6.01                        ;
++-----------------------+-----------------------------+
+
+
++-------------------------------+
+; Elapsed Time Per Partition    ;
++----------------+--------------+
+; Partition Name ; Elapsed Time ;
++----------------+--------------+
+; Top            ; 00:00:16     ;
++----------------+--------------+
+
+
++-------------------------------+
+; Analysis & Synthesis Messages ;
++-------------------------------+
+Info: *******************************************************************
+Info: Running Quartus Prime Analysis & Synthesis
+    Info: Version 15.1.0 Build 185 10/21/2015 SJ Lite Edition
+    Info: Processing started: Fri Apr  1 23:15:07 2016
+Info: Command: quartus_map --read_settings_files=on --write_settings_files=off Project -c Project
+Info (16303): Aggressive Performance optimization mode selected -- timing performance will be prioritized at the potential cost of increased logic area and compilation time
+    Info (16304): Mode behavior is affected by advanced setting Physical Synthesis Effort Level (default for this mode is Normal)
+Warning (20028): Parallel compilation is not licensed and has been disabled
+Info (12021): Found 1 design units, including 1 entities, in source file Pll.v
+    Info (12023): Found entity 1: Pll File: /home/adminuser/Downloads/Project3(1)_restored/Pll.v Line: 8
+Info (12021): Found 1 design units, including 1 entities, in source file Pll/Pll_0002.v
+    Info (12023): Found entity 1: Pll_0002 File: /home/adminuser/Downloads/Project3(1)_restored/Pll/Pll_0002.v Line: 2
+Info (12021): Found 1 design units, including 1 entities, in source file Project.v
+    Info (12023): Found entity 1: Project File: /home/adminuser/Downloads/Project3(1)_restored/Project.v Line: 1
+Info (12021): Found 1 design units, including 1 entities, in source file SevenSeg.v
+    Info (12023): Found entity 1: SevenSeg File: /home/adminuser/Downloads/Project3(1)_restored/SevenSeg.v Line: 1
+Info (12021): Found 1 design units, including 1 entities, in source file Funit.v
+    Info (12023): Found entity 1: Funit File: /home/adminuser/Downloads/Project3(1)_restored/Funit.v Line: 1
+Info (12127): Elaborating entity "Project" for the top level hierarchy
+Warning (10036): Verilog HDL or VHDL warning at Project.v(67): object "keyStore" assigned a value but never read File: /home/adminuser/Downloads/Project3(1)_restored/Project.v Line: 67
+Warning (10858): Verilog HDL warning at Project.v(114): object imem used but never assigned File: /home/adminuser/Downloads/Project3(1)_restored/Project.v Line: 114
+Warning (10036): Verilog HDL or VHDL warning at Project.v(314): object "regval1_W" assigned a value but never read File: /home/adminuser/Downloads/Project3(1)_restored/Project.v Line: 314
+Warning (10036): Verilog HDL or VHDL warning at Project.v(315): object "regval2_W" assigned a value but never read File: /home/adminuser/Downloads/Project3(1)_restored/Project.v Line: 315
+Warning (10036): Verilog HDL or VHDL warning at Project.v(330): object "selaluout_W" assigned a value but never read File: /home/adminuser/Downloads/Project3(1)_restored/Project.v Line: 330
+Warning (10036): Verilog HDL or VHDL warning at Project.v(333): object "selpcplus_W" assigned a value but never read File: /home/adminuser/Downloads/Project3(1)_restored/Project.v Line: 333
+Warning (10036): Verilog HDL or VHDL warning at Project.v(336): object "selmemout_W" assigned a value but never read File: /home/adminuser/Downloads/Project3(1)_restored/Project.v Line: 336
+Warning (10036): Verilog HDL or VHDL warning at Project.v(341): object "pcplus_W" assigned a value but never read File: /home/adminuser/Downloads/Project3(1)_restored/Project.v Line: 341
+Warning (10036): Verilog HDL or VHDL warning at Project.v(343): object "workingimm_M" assigned a value but never read File: /home/adminuser/Downloads/Project3(1)_restored/Project.v Line: 343
+Warning (10036): Verilog HDL or VHDL warning at Project.v(351): object "sreg1_W" assigned a value but never read File: /home/adminuser/Downloads/Project3(1)_restored/Project.v Line: 351
+Warning (10036): Verilog HDL or VHDL warning at Project.v(352): object "sreg2_W" assigned a value but never read File: /home/adminuser/Downloads/Project3(1)_restored/Project.v Line: 352
+Warning (10036): Verilog HDL or VHDL warning at Project.v(356): object "PC_M" assigned a value but never read File: /home/adminuser/Downloads/Project3(1)_restored/Project.v Line: 356
+Warning (10036): Verilog HDL or VHDL warning at Project.v(357): object "flush_A" assigned a value but never read File: /home/adminuser/Downloads/Project3(1)_restored/Project.v Line: 357
+Warning (10230): Verilog HDL assignment warning at Project.v(388): truncated value with size 32 to match size of target (6) File: /home/adminuser/Downloads/Project3(1)_restored/Project.v Line: 388
+Warning (10230): Verilog HDL assignment warning at Project.v(391): truncated value with size 32 to match size of target (1) File: /home/adminuser/Downloads/Project3(1)_restored/Project.v Line: 391
+Warning (10230): Verilog HDL assignment warning at Project.v(394): truncated value with size 32 to match size of target (1) File: /home/adminuser/Downloads/Project3(1)_restored/Project.v Line: 394
+Warning (10230): Verilog HDL assignment warning at Project.v(397): truncated value with size 32 to match size of target (1) File: /home/adminuser/Downloads/Project3(1)_restored/Project.v Line: 397
+Warning (10230): Verilog HDL assignment warning at Project.v(398): truncated value with size 32 to match size of target (1) File: /home/adminuser/Downloads/Project3(1)_restored/Project.v Line: 398
+Warning (10230): Verilog HDL assignment warning at Project.v(399): truncated value with size 32 to match size of target (1) File: /home/adminuser/Downloads/Project3(1)_restored/Project.v Line: 399
+Warning (10230): Verilog HDL assignment warning at Project.v(402): truncated value with size 32 to match size of target (1) File: /home/adminuser/Downloads/Project3(1)_restored/Project.v Line: 402
+Warning (10230): Verilog HDL assignment warning at Project.v(405): truncated value with size 32 to match size of target (1) File: /home/adminuser/Downloads/Project3(1)_restored/Project.v Line: 405
+Warning (10230): Verilog HDL assignment warning at Project.v(416): truncated value with size 32 to match size of target (6) File: /home/adminuser/Downloads/Project3(1)_restored/Project.v Line: 416
+Warning (10230): Verilog HDL assignment warning at Project.v(419): truncated value with size 32 to match size of target (6) File: /home/adminuser/Downloads/Project3(1)_restored/Project.v Line: 419
+Warning (10230): Verilog HDL assignment warning at Project.v(422): truncated value with size 32 to match size of target (6) File: /home/adminuser/Downloads/Project3(1)_restored/Project.v Line: 422
+Warning (10230): Verilog HDL assignment warning at Project.v(425): truncated value with size 32 to match size of target (1) File: /home/adminuser/Downloads/Project3(1)_restored/Project.v Line: 425
+Info (12128): Elaborating entity "Pll" for hierarchy "Pll:myPll" File: /home/adminuser/Downloads/Project3(1)_restored/Project.v Line: 87
+Info (12128): Elaborating entity "Pll_0002" for hierarchy "Pll:myPll|Pll_0002:pll_inst" File: /home/adminuser/Downloads/Project3(1)_restored/Pll.v Line: 20
+Info (12128): Elaborating entity "altera_pll" for hierarchy "Pll:myPll|Pll_0002:pll_inst|altera_pll:altera_pll_i" File: /home/adminuser/Downloads/Project3(1)_restored/Pll/Pll_0002.v Line: 85
+Info (10008): Verilog HDL or VHDL information: EDA Netlist Writer cannot regroup multidimensional array "wire_to_nowhere_64" into its bus
+Info (12130): Elaborated megafunction instantiation "Pll:myPll|Pll_0002:pll_inst|altera_pll:altera_pll_i" File: /home/adminuser/Downloads/Project3(1)_restored/Pll/Pll_0002.v Line: 85
+Info (12133): Instantiated megafunction "Pll:myPll|Pll_0002:pll_inst|altera_pll:altera_pll_i" with the following parameter: File: /home/adminuser/Downloads/Project3(1)_restored/Pll/Pll_0002.v Line: 85
+    Info (12134): Parameter "fractional_vco_multiplier" = "false"
+    Info (12134): Parameter "reference_clock_frequency" = "50.0 MHz"
+    Info (12134): Parameter "operation_mode" = "direct"
+    Info (12134): Parameter "number_of_clocks" = "1"
+    Info (12134): Parameter "output_clock_frequency0" = "86.000000 MHz"
+    Info (12134): Parameter "phase_shift0" = "0 ps"
+    Info (12134): Parameter "duty_cycle0" = "50"
+    Info (12134): Parameter "output_clock_frequency1" = "0 MHz"
+    Info (12134): Parameter "phase_shift1" = "0 ps"
+    Info (12134): Parameter "duty_cycle1" = "50"
+    Info (12134): Parameter "output_clock_frequency2" = "0 MHz"
+    Info (12134): Parameter "phase_shift2" = "0 ps"
+    Info (12134): Parameter "duty_cycle2" = "50"
+    Info (12134): Parameter "output_clock_frequency3" = "0 MHz"
+    Info (12134): Parameter "phase_shift3" = "0 ps"
+    Info (12134): Parameter "duty_cycle3" = "50"
+    Info (12134): Parameter "output_clock_frequency4" = "0 MHz"
+    Info (12134): Parameter "phase_shift4" = "0 ps"
+    Info (12134): Parameter "duty_cycle4" = "50"
+    Info (12134): Parameter "output_clock_frequency5" = "0 MHz"
+    Info (12134): Parameter "phase_shift5" = "0 ps"
+    Info (12134): Parameter "duty_cycle5" = "50"
+    Info (12134): Parameter "output_clock_frequency6" = "0 MHz"
+    Info (12134): Parameter "phase_shift6" = "0 ps"
+    Info (12134): Parameter "duty_cycle6" = "50"
+    Info (12134): Parameter "output_clock_frequency7" = "0 MHz"
+    Info (12134): Parameter "phase_shift7" = "0 ps"
+    Info (12134): Parameter "duty_cycle7" = "50"
+    Info (12134): Parameter "output_clock_frequency8" = "0 MHz"
+    Info (12134): Parameter "phase_shift8" = "0 ps"
+    Info (12134): Parameter "duty_cycle8" = "50"
+    Info (12134): Parameter "output_clock_frequency9" = "0 MHz"
+    Info (12134): Parameter "phase_shift9" = "0 ps"
+    Info (12134): Parameter "duty_cycle9" = "50"
+    Info (12134): Parameter "output_clock_frequency10" = "0 MHz"
+    Info (12134): Parameter "phase_shift10" = "0 ps"
+    Info (12134): Parameter "duty_cycle10" = "50"
+    Info (12134): Parameter "output_clock_frequency11" = "0 MHz"
+    Info (12134): Parameter "phase_shift11" = "0 ps"
+    Info (12134): Parameter "duty_cycle11" = "50"
+    Info (12134): Parameter "output_clock_frequency12" = "0 MHz"
+    Info (12134): Parameter "phase_shift12" = "0 ps"
+    Info (12134): Parameter "duty_cycle12" = "50"
+    Info (12134): Parameter "output_clock_frequency13" = "0 MHz"
+    Info (12134): Parameter "phase_shift13" = "0 ps"
+    Info (12134): Parameter "duty_cycle13" = "50"
+    Info (12134): Parameter "output_clock_frequency14" = "0 MHz"
+    Info (12134): Parameter "phase_shift14" = "0 ps"
+    Info (12134): Parameter "duty_cycle14" = "50"
+    Info (12134): Parameter "output_clock_frequency15" = "0 MHz"
+    Info (12134): Parameter "phase_shift15" = "0 ps"
+    Info (12134): Parameter "duty_cycle15" = "50"
+    Info (12134): Parameter "output_clock_frequency16" = "0 MHz"
+    Info (12134): Parameter "phase_shift16" = "0 ps"
+    Info (12134): Parameter "duty_cycle16" = "50"
+    Info (12134): Parameter "output_clock_frequency17" = "0 MHz"
+    Info (12134): Parameter "phase_shift17" = "0 ps"
+    Info (12134): Parameter "duty_cycle17" = "50"
+    Info (12134): Parameter "pll_type" = "General"
+    Info (12134): Parameter "pll_subtype" = "General"
+Info (12128): Elaborating entity "SevenSeg" for hierarchy "SevenSeg:ss5" File: /home/adminuser/Downloads/Project3(1)_restored/Project.v Line: 252
+Info (12128): Elaborating entity "Funit" for hierarchy "Funit:forward" File: /home/adminuser/Downloads/Project3(1)_restored/Project.v Line: 466
+Warning (113028): 1 out of 16384 addresses are uninitialized. The Quartus Prime software will initialize them to "0". There are 1 warnings found, and 1 warnings are reported. File: /home/adminuser/Downloads/Project3(1)_restored/Sorter3.mif Line: 1
+    Warning (113026): Memory Initialization File Address 0 is not initialized File: /home/adminuser/Downloads/Project3(1)_restored/Sorter3.mif Line: 1
+Warning (276020): Inferred RAM node "dmem_rtl_0" from synchronous design logic.  Pass-through logic has been added to match the read-during-write behavior of the original design.
+Info (276014): Found 2 instances of uninferred RAM logic
+    Info (276007): RAM logic "imem" is uninferred due to asynchronous read logic File: /home/adminuser/Downloads/Project3(1)_restored/Project.v Line: 114
+    Info (276007): RAM logic "regs" is uninferred due to asynchronous read logic File: /home/adminuser/Downloads/Project3(1)_restored/Project.v Line: 145
+Info (19000): Inferred 1 megafunctions from design logic
+    Info (276029): Inferred altsyncram megafunction from the following design logic: "dmem_rtl_0" 
+        Info (286033): Parameter OPERATION_MODE set to DUAL_PORT
+        Info (286033): Parameter WIDTH_A set to 32
+        Info (286033): Parameter WIDTHAD_A set to 14
+        Info (286033): Parameter NUMWORDS_A set to 16384
+        Info (286033): Parameter WIDTH_B set to 32
+        Info (286033): Parameter WIDTHAD_B set to 14
+        Info (286033): Parameter NUMWORDS_B set to 16384
+        Info (286033): Parameter ADDRESS_ACLR_A set to NONE
+        Info (286033): Parameter OUTDATA_REG_B set to UNREGISTERED
+        Info (286033): Parameter ADDRESS_ACLR_B set to NONE
+        Info (286033): Parameter OUTDATA_ACLR_B set to NONE
+        Info (286033): Parameter ADDRESS_REG_B set to CLOCK0
+        Info (286033): Parameter INDATA_ACLR_A set to NONE
+        Info (286033): Parameter WRCONTROL_ACLR_A set to NONE
+        Info (286033): Parameter INIT_FILE set to Sorter3.mif
+Info (12130): Elaborated megafunction instantiation "altsyncram:dmem_rtl_0"
+Info (12133): Instantiated megafunction "altsyncram:dmem_rtl_0" with the following parameter:
+    Info (12134): Parameter "OPERATION_MODE" = "DUAL_PORT"
+    Info (12134): Parameter "WIDTH_A" = "32"
+    Info (12134): Parameter "WIDTHAD_A" = "14"
+    Info (12134): Parameter "NUMWORDS_A" = "16384"
+    Info (12134): Parameter "WIDTH_B" = "32"
+    Info (12134): Parameter "WIDTHAD_B" = "14"
+    Info (12134): Parameter "NUMWORDS_B" = "16384"
+    Info (12134): Parameter "ADDRESS_ACLR_A" = "NONE"
+    Info (12134): Parameter "OUTDATA_REG_B" = "UNREGISTERED"
+    Info (12134): Parameter "ADDRESS_ACLR_B" = "NONE"
+    Info (12134): Parameter "OUTDATA_ACLR_B" = "NONE"
+    Info (12134): Parameter "ADDRESS_REG_B" = "CLOCK0"
+    Info (12134): Parameter "INDATA_ACLR_A" = "NONE"
+    Info (12134): Parameter "WRCONTROL_ACLR_A" = "NONE"
+    Info (12134): Parameter "INIT_FILE" = "Sorter3.mif"
+Info (12021): Found 1 design units, including 1 entities, in source file db/altsyncram_o4l1.tdf
+    Info (12023): Found entity 1: altsyncram_o4l1 File: /home/adminuser/Downloads/Project3(1)_restored/db/altsyncram_o4l1.tdf Line: 34
+Info (12021): Found 1 design units, including 1 entities, in source file db/decode_5la.tdf
+    Info (12023): Found entity 1: decode_5la File: /home/adminuser/Downloads/Project3(1)_restored/db/decode_5la.tdf Line: 23
+Info (12021): Found 1 design units, including 1 entities, in source file db/decode_u0a.tdf
+    Info (12023): Found entity 1: decode_u0a File: /home/adminuser/Downloads/Project3(1)_restored/db/decode_u0a.tdf Line: 23
+Info (12021): Found 1 design units, including 1 entities, in source file db/mux_2hb.tdf
+    Info (12023): Found entity 1: mux_2hb File: /home/adminuser/Downloads/Project3(1)_restored/db/mux_2hb.tdf Line: 23
+Warning (12241): 6 hierarchies have connectivity warnings - see the Connectivity Checks report folder
+Info (286030): Timing-Driven Synthesis is running
+Info (17049): 1025 registers lost all their fanouts during netlist optimizations.
+Info (16010): Generating hard_block partition "hard_block:auto_generated_inst"
+    Info (16011): Adding 5 node(s), including 0 DDIO, 1 PLL, 0 transceiver and 0 LCELL
+Info (21057): Implemented 3051 device resources after synthesis - the final resource count might be different
+    Info (21058): Implemented 16 input pins
+    Info (21059): Implemented 52 output pins
+    Info (21061): Implemented 2918 logic cells
+    Info (21064): Implemented 64 RAM segments
+    Info (21065): Implemented 1 PLLs
+Info: Quartus Prime Analysis & Synthesis was successful. 0 errors, 30 warnings
+    Info: Peak virtual memory: 1424 megabytes
+    Info: Processing ended: Fri Apr  1 23:15:47 2016
+    Info: Elapsed time: 00:00:40
+    Info: Total CPU time (on all processors): 00:01:04
+
+
