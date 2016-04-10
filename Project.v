@@ -22,8 +22,13 @@ module Project(
   parameter ADDRHEX  =32'hFFFFF000;
   parameter ADDRLEDR =32'hFFFFF020;
   parameter ADDRKEY  =32'hFFFFF080;
+  parameter ADDRKEYCTRL =32'hFFFFF084;
   parameter ADDRSW   =32'hFFFFF090;
-  parameter IMEMINITFILE="Sorter3.mif";
+  parameter ADDRSWCTRL	=32'hFFFFF094;
+  parameter ADDRTCNT	=32'hFFFF0100;
+  parameter ADDRTLIM	=32'hFFFF0104;
+  parameter ADDRTCTL	=32'hFFFF0108;
+  parameter IMEMINITFILE="Test2.mif";
   parameter IMEMADDRBITS=16;
   parameter IMEMWORDBITS=2;
   parameter IMEMWORDS=(1<<(IMEMADDRBITS-IMEMWORDBITS));
@@ -59,21 +64,35 @@ module Project(
   parameter OP2_NOR  =OP2_OR |6'b001000;
   parameter OP2_NXOR =OP2_XOR|6'b001000;
   
+  //clock frequency
+  parameter FREQ = 10'd50;
+  parameter MILLISEC = FREQ*24'd10000;
+  
 	reg [3:0] oldkey=4'b1111;
 	wire key0press={oldkey[0],KEY[0]}==2'b00;
 	wire key1press={oldkey[1],KEY[1]}==2'b00;
 	wire key2press={oldkey[2],KEY[2]}==2'b00;
 	wire key3press={oldkey[3],KEY[3]}==2'b00;
-	wire [(DBITS-1):0] keyStore={28'b0,key3press,key2press,key1press,key0press};
-	 
+	
+	reg [3:0] KCTRL = 4'd0;
+	reg [3:0] KDATA = 4'd0;
+	
+	//high if KDATA change is detected
+	wire key_ready=(KEY!=KDATA);
+	//set high if ready is still 1 when KDATA changes
+	wire key_overrun=key_ready&&(KCTRL[0]);
+	//control bit. 0 for now
+	wire key_ie=0;
+	
 	 always @(posedge clk) begin
 		oldkey<=KEY;
-		//store keypress values at correct location
+		//...bit 4 is ie? Does he mean bit 3? Is a bit just always 0? Should this just be 3 bits?
+		KCTRL<={key_ie,1'b0,key_overrun,key_ready};
+		KDATA<={key3press,key2press,key1press,key0press};
+		//read from KDATA sets ready bit to 0
+		if(memaddr_M==ADDRKEY && selmemout_M)
+			KCTRL[0]<=1'b0;
 	  end
-  
-  
-  
-  
   
   // The reset signal comes from the reset button on the DE0-CV board
   // RESET_N is active-low, so we flip its value ("reset" is active-high)
@@ -88,6 +107,37 @@ module Project(
   wire reset=!locked;
   //reg [(DBITS+1):0] bpred[(DBITS-1):0];
   //assign clk=!KEY[0];
+  
+  //made switch debouncer arbitrarily large
+  reg [23:0] switch_debouncer;
+  reg [9:0] SDATA;
+  reg [3:0] SCTRL;
+  //1 when a switch value changes
+  wire switch_ready=(SDATA!=SW);
+  //if the switch value has changed, but ready is still high
+  wire switch_overrun=(switch_ready)&&(SDATA[0]);
+  //for interrupts. 0 for now
+  wire switch_control = 0;
+  
+  always @(posedge clk or posedge reset) begin
+	  if(reset)
+		switch_debouncer<=24'd0;
+	  else begin
+			if(switch_ready) //begin debouncing whenever any switch value changes and remains changed
+				switch_debouncer<=switch_debouncer+24'd1;
+			else //when value is stable, no need to debounce
+				switch_debouncer<=24'd0;
+			//if we're not udpating the switch value on debounce, if switch is read we should 
+			//clear the ready bit
+			if(switch_debouncer>=(MILLISEC*24'd10)) begin
+				//wondering what's going on with bits #2 and #3 here as well
+				SCTRL<={switch_control, 1'b0, switch_overrun, switch_ready};
+				SDATA<={SW};
+				switch_debouncer<=24'd0;
+			end else if(memaddr_M==ADDRSW && selmemout_M)
+				SDATA[0]<=1'b0;
+		end
+	end
   
 	// The PC register and update logic
 	reg  [(DBITS-1):0] PC=STARTPC;
@@ -158,54 +208,64 @@ module Project(
 	// Connect memory and input devices to the bus
 	wire [(DBITS-1):0] memout_M=
 		MemEnable?MemVal:
-		(memaddr_M==ADDRKEY)?{12'b0,~KEY}:
-		(memaddr_M==ADDRSW)? { 6'b0,SW}:
+		(memaddr_M==ADDRKEY)?{12'b0,KDATA}:
+		(memaddr_M==ADDRSW)? {6'b0,SDATA}:
 		32'hDEADDEAD;
 	
-	// TODO: Decide what gets written into the destination register (wregval_M),
-	// when it gets written (wrreg_M) and to which register it gets written (wregno_M)
-	// !!!!current selpcplus_D won't work with branches
-	wire [(DBITS-1):0] wregval_M=(selaluout_M&&!selmemout_M)?aluout_M:selmemout_M?memout_M:selpcplus_M?pcplus_M:{(DBITS){1'bX}};
+	// If LW is executed with the address targeting Hex or LEDR, it will grab the current output
+	wire [(DBITS-1):0] wregval_M=(selaluout_M&&!selmemout_M)?aluout_M:
+											selmemout_M&&(memaddr_M==ADDRLEDR)?{{22'b0},LedrOut}:
+											selmemout_M&&(memaddr_M==ADDRHEX)?{{8'b0},HexOut}:
+											selmemout_M?memout_M:
+											selpcplus_M?pcplus_M:
+											{(DBITS){1'bX}};
 	
 	always @(posedge clk)
 		if(wrreg_W&&!reset)
 			regs[wregno_W]<=wregval_W;
 
-	// TODO: Get these signals to the ALU somehow
 	//aluin's handle WAR data hazard
 	reg [(OP2BITS-1):0] alufunc_A;
 	wire signed [(DBITS-1):0] aluin1_A=(isjump_A)?pcplus_A:regval1_A;
 	wire signed [(DBITS-1):0] aluin2_A=aluimm_A?workingimm_A:regval2_A;
+	wire signed [(DBITS-1):0] alu_log;
+	wire signed [(DBITS-1):0] alu_eq;
+	wire signed [(DBITS-1):0] alu_br;
+	wire signed [(DBITS-1):0] alu_mth;
+	wire signed [(DBITS-1):0] aluout_A;
 	
-	reg signed [(DBITS-1):0] aluout_A;
-	always @(alufunc_A or aluin1_A or aluin2_A)
-	case(alufunc_A)
-		OP2_EQ,OP1_BEQ:  aluout_A={31'b0,aluin1_A==aluin2_A};
-		OP2_LT,OP1_BLT:  aluout_A={31'b0,aluin1_A< aluin2_A};
-		OP2_LE,OP1_BLE:  aluout_A={31'b0,aluin1_A<=aluin2_A};
-		OP2_NE,OP1_BNE:  aluout_A={31'b0,aluin1_A!=aluin2_A};
-		OP2_ADD: aluout_A=aluin1_A+aluin2_A;
-		OP2_AND,OP1_ANDI: aluout_A=aluin1_A&aluin2_A;
-		OP2_OR:  aluout_A=aluin1_A|aluin2_A;
-		OP2_XOR: aluout_A=aluin1_A^aluin2_A;
-		OP2_SUB: aluout_A=aluin1_A-aluin2_A;
-		OP2_NAND:aluout_A=~(aluin1_A&aluin2_A);
-		OP2_NOR: aluout_A=~(aluin1_A|aluin2_A);
-		OP2_NXOR:aluout_A=~(aluin1_A^aluin2_A);
-		default: aluout_A={DBITS{1'bX}};
-	endcase
+	assign alu_br=	(!isbranch_A)?{32'b0}:
+					(alufunc_A==OP1_BEQ)?{31'b0,aluin1_A==aluin2_A}:
+					(alufunc_A==OP1_BNE)?{31'b0,aluin1_A!=aluin2_A}:
+					(alufunc_A==OP1_BLT)?{31'b0,aluin1_A<aluin2_A}:
+					{31'b0,aluin1_A<=aluin2_A}; //else BLE
+	assign alu_eq=	(alufunc_A==OP2_EQ)?{31'b0,aluin1_A==aluin2_A}:
+					(alufunc_A==OP2_NE)?{31'b0,aluin1_A!=aluin2_A}:
+					(alufunc_A==OP2_LT)?{31'b0,aluin1_A<aluin2_A}:
+					(alufunc_A==OP2_LE)?{31'b0,aluin1_A<=aluin2_A}:
+					{32'b0};
+	assign alu_log=	(alufunc_A==OP2_AND)?{aluin1_A&aluin2_A}:
+					(alufunc_A==OP2_OR)?{aluin1_A|aluin2_A}:
+					(alufunc_A==OP2_XOR)?{aluin1_A^aluin2_A}:
+					(alufunc_A==OP2_NAND)?{~(aluin1_A&aluin2_A)}:
+					(alufunc_A==OP2_NOR)?{~(aluin1_A|aluin2_A)}:
+					(alufunc_A==OP2_NXOR)?{~(aluin1_A^aluin2_A)}:
+					{32'b0};
+	assign alu_mth=	(alufunc_A==OP2_ADD)?{aluin1_A+aluin2_A}:
+					(alufunc_A==OP2_SUB)?{aluin1_A-aluin2_A}:
+					{32'b0};
+	
+	assign aluout_A = {alu_br|alu_eq|alu_log|alu_mth};
 	
 	//do we actually need stall with branch prediction?
-	wire dobranch_A=(isbranch_A&&(aluout_A==1));	//TODO
-	//PC+4+4*sxt(imm)
+	wire dobranch_A=(isbranch_A&&(aluout_A==1));
 	
-	wire [(DBITS-1):0] brtarg_A=pcplus_A+workingimm_A;	//TODO
+	wire [(DBITS-1):0] brtarg_A=pcplus_A+workingimm_A;
 	//same address computation as branch - need ALU for other part of instr
-	wire [(DBITS-1):0] jmptarg_A=regval1_A+workingimm_A;	//TODO
+	wire [(DBITS-1):0] jmptarg_A=regval1_A+workingimm_A;
 	
-	reg [(DBITS-1):0] pcpred_A;	//TODO
+	reg [(DBITS-1):0] pcpred_A;
 	
-	// TODO: Generate the dobranch, brtarg, isjump, and jmptarg signals somehow...
 	wire [(DBITS-1):0] pcgood_A=
 		dobranch_A?brtarg_A:
 		isjump_A?jmptarg_A:
@@ -226,13 +286,8 @@ module Project(
 			end
 	end*/
 	
-	// TODO: This is a good place to generate the flush_? signals
-	
 	wire flush_D=(mispred_B|isjump_A);
 	
-	// TODO: Write code that produces wmemval_M, wrmem_M, wrreg_M, etc.
-	//store value from source register two
-		//TODO
 	reg [(DBITS-1):0] memaddr_M;
 	wire [(DBITS-1):0] wmemval_M=wrmem_M?regval2_M:{(DBITS){1'bX}};
 	always @(posedge clk)
@@ -246,7 +301,6 @@ module Project(
 		{aluout_M,pcplus_M}<=
 		{aluout_A,pcplus_A};
 	
-	// Create and connect HEX register
 	reg [23:0] HexOut;
 	reg [9:0] LedrOut;
 	SevenSeg ss5(.OUT(HEX5),.IN(HexOut[23:20]));
@@ -264,7 +318,6 @@ module Project(
 		else begin
 			if(wrmem_M&&(memaddr_M==ADDRHEX))
 				HexOut[23:0] <= wmemval_M[23:0];
-	// TODO: Write the code for LEDR here
 			if(wrmem_M&&(memaddr_M==ADDRLEDR))
 				LedrOut <= wmemval_M[9:0];
 		end
@@ -284,7 +337,6 @@ module Project(
 		OP1_ALUR:
 			{aluimm_D,alufunc_D,selaluout_D,selmemout_D,selpcplus_D,wregno_D,wrreg_D}=
 			{		1'b0,    op2_D,       1'b1,       1'b0,       1'b0,    rd_D,   1'b1};
-			// TODO: Write the rest of the decoding code
 		OP1_ADDI,OP1_ANDI,OP1_ORI,OP1_XORI:
 			{aluimm_D,alufunc_D,selaluout_D,selmemout_D,selpcplus_D,wregno_D,wrreg_D,workingimm_D}=
 			{		1'b1,		op1_D,		1'b1,			1'b0,			1'b0,		rt_D,		1'b1,	{{(DBITS-IMMBITS){rawimm_D[IMMBITS-1]}},{rawimm_D}}};		
@@ -303,7 +355,6 @@ module Project(
 		
 		default: ;
 		endcase
-		//ensure ALU registers don't get clobbered when new instruction is decoded next cycle
 	end
 	
 	//update regs for Exec/ALU stage
@@ -340,7 +391,6 @@ module Project(
 	reg [(DBITS-1):0] pcplus_A;
 	reg [(DBITS-1):0] pcplus_W;
 	reg signed [(DBITS-1):0] workingimm_A;
-	reg signed [(DBITS-1):0] workingimm_M; //just for debugging
 	reg [(REGNOBITS-1):0] dreg_A={REGNOBITS{1'b0}};
 	reg [(REGNOBITS-1):0] dreg_M={REGNOBITS{1'b0}};
 	reg [(REGNOBITS-1):0] dreg_W={REGNOBITS{1'b0}};
@@ -411,7 +461,6 @@ module Project(
 		pcplus_A<=(stall)?0:pcplus_D;
 		pcplus_W<=pcplus_M;
 		workingimm_A<=(stall)?0:workingimm_D;
-		workingimm_M<=workingimm_A;
 		alufunc_A<=alufunc_D;
 		dreg_A<=(stall)?0:dreg_D;
 		dreg_M<=dreg_A;
@@ -432,7 +481,7 @@ module Project(
 	wire mnop = (isnop_M |wrmem_M);
 	wire anop = (isnop_A |wrmem_A);
 	wire wnop = (isnop_W |wrmem_W);
-	wire [1:0] sreg1_mux; //0 should drive regfile, 1 should drive aluout and 2 should drive Memout
+  wire [1:0] sreg1_mux; //0 should drive regfile, 1 should drive aluout and 2 should drive Memout
   wire [1:0] sreg2_mux;
   wire stall;
   wire A1;
