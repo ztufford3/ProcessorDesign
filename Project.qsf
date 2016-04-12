@@ -169,7 +169,7 @@ set_global_assignment -name FAMILY "Cyclone V"
 set_global_assignment -name DEVICE 5CEBA4F23C7
 set_global_assignment -name TOP_LEVEL_ENTITY Project
 set_global_assignment -name ORIGINAL_QUARTUS_VERSION 15.1.0
-set_global_assignment -name LAST_QUARTUS_VERSION 15.1.0
+set_global_assignment -name LAST_QUARTUS_VERSION 14.0
 set_global_assignment -name PROJECT_CREATION_TIME_DATE "10:58:21  FEBRUARY 02, 2016"
 set_global_assignment -name DEVICE_FILTER_PACKAGE FBGA
 set_global_assignment -name DEVICE_FILTER_PIN_COUNT 484
@@ -190,7 +190,6 @@ set_instance_assignment -name SLEW_RATE 1 -to HEX*
 set_instance_assignment -name CURRENT_STRENGTH_NEW 16MA -to HEX*
 set_global_assignment -name TIMEQUEST_MULTICORNER_ANALYSIS ON
 set_global_assignment -name SMART_RECOMPILE ON
-set_global_assignment -name OPTIMIZATION_MODE "AGGRESSIVE PERFORMANCE"
 set_global_assignment -name MUX_RESTRUCTURE OFF
 set_global_assignment -name STATE_MACHINE_PROCESSING AUTO
 set_global_assignment -name SAFE_STATE_MACHINE OFF
@@ -212,9 +211,7 @@ set_global_assignment -name OPTIMIZE_SSN OFF
 set_global_assignment -name OPTIMIZE_TIMING "NORMAL COMPILATION"
 set_global_assignment -name FINAL_PLACEMENT_OPTIMIZATION AUTOMATICALLY
 set_global_assignment -name FITTER_AGGRESSIVE_ROUTABILITY_OPTIMIZATION AUTOMATICALLY
-set_global_assignment -name PERIPHERY_TO_CORE_PLACEMENT_AND_ROUTING_OPTIMIZATION AUTO
 set_global_assignment -name ENABLE_BUS_HOLD_CIRCUITRY OFF
-set_global_assignment -name QII_AUTO_PACKED_REGISTERS AUTO
 set_global_assignment -name AUTO_DELAY_CHAINS_FOR_HIGH_FANOUT_INPUT_PINS ON
 set_global_assignment -name PHYSICAL_SYNTHESIS_COMBO_LOGIC_FOR_AREA ON
 set_global_assignment -name PHYSICAL_SYNTHESIS_COMBO_LOGIC ON
@@ -230,6 +227,12 @@ set_global_assignment -name SYNCHRONIZER_IDENTIFICATION AUTO
 set_global_assignment -name ENABLE_BENEFICIAL_SKEW_OPTIMIZATION ON
 set_global_assignment -name CLAMPING_DIODE OFF
 set_global_assignment -name ALM_REGISTER_PACKING_EFFORT LOW
+set_global_assignment -name EDA_SIMULATION_TOOL "ModelSim-Altera (Verilog)"
+set_global_assignment -name EDA_OUTPUT_DATA_FORMAT "VERILOG HDL" -section_id eda_simulation
+set_global_assignment -name ENABLE_SIGNALTAP ON
+set_global_assignment -name USE_SIGNALTAP_FILE stp1.stp
+set_global_assignment -name VERILOG_FILE Timer.v
+set_global_assignment -name VERILOG_FILE Funit.v
 set_global_assignment -name MIF_FILE Sorter3.mif
 set_global_assignment -name SOURCE_FILE Sorter3.a32
 set_global_assignment -name MIF_FILE Test2.mif
@@ -239,5 +242,4 @@ set_global_assignment -name QIP_FILE Pll.qip
 set_global_assignment -name SIP_FILE Pll.sip
 set_global_assignment -name VERILOG_FILE Project.v
 set_global_assignment -name VERILOG_FILE SevenSeg.v
-set_global_assignment -name VERILOG_FILE Funit.v
 set_instance_assignment -name PARTITION_HIERARCHY root_partition -to | -section_id Top
