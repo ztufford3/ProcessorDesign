@@ -105,7 +105,7 @@ module Project(
     .locked   (locked)
   );
   wire reset=!locked;
-  //reg [(DBITS+1):0] bpred[(DBITS-1):0];
+  reg [(DBITS-1):0] bpred[3:0];
   //assign clk=!KEY[0];
   
   //made switch debouncer arbitrarily large
@@ -154,10 +154,10 @@ module Project(
 	// This is the predicted value of the PC
 	// that we used to fetch the next instruction
 	//wire [(DBITS+1):0] predval=bpred[PC[(DBITS-1):0]];
-	//wire [(DBITS-1):0] prediction=predval[(DBITS-1):0];
+	wire [(DBITS-1):0] prediction=bpred[PC[3:0]];
 	//wire [1:0] predodds=predval[(DBITS+1):(DBITS)];
-	//wire [(DBITS-1):0] pcpred_F=(prediction!=0&&predodds>2'd1)?prediction:pcplus_F;
-	wire [(DBITS-1):0] pcpred_F=pcplus_F;
+	wire [(DBITS-1):0] pcpred_F=(prediction!=0)?prediction:pcplus_F;
+	//wire [(DBITS-1):0] pcpred_F=pcplus_F;
 	
 	// Instruction-fetch
 	(* ram_init_file = IMEMINITFILE *)
@@ -273,18 +273,18 @@ module Project(
 	wire mispred_A=(pcgood_A!=pcpred_A);
 	wire mispred_B=mispred_A&&!isnop_A;
 	wire [(DBITS-1):0] pcgood_B=pcgood_A;
-	/*
-	wire [1:0] newpredodds=mispred_B?predodds_A+2'd1:predodds_A;
+	
+	//wire [1:0] newpredodds=mispred_B?predodds_A+2'd1:predodds_A;
 	integer i;
 	always @(posedge clk or posedge reset) begin
 		if(reset) begin
-		for(i=0;i<(1<<(DBITS-1));i=i+1)
-			bpred[i]<=34'd0;
+		for(i=0;i<4;i=i+1)
+			bpred[i]<=32'd0;
 		end else
-			if(!flush_A) begin
-				bpred[PC_A[(DBITS-1):0]] <= {newpredodds,pcgood_A};
+			if(!flush_W) begin
+				bpred[PC_W[3:0]] <= pcgood_W;
 			end
-	end*/
+	end
 	
 	wire flush_D=(mispred_B|isjump_A);
 	
@@ -404,34 +404,27 @@ module Project(
 	wire [(REGNOBITS-1):0] dreg_D=(aluimm_D|isjump_D)?rt_D:rd_D;
 	reg [(DBITS-1):0] PC_A;
 	reg [(DBITS-1):0] PC_M;
+	reg [(DBITS-1):0] PC_W;
 	reg flush_A;
-	reg [1:0] predodds_A;
+	reg flush_M;
+	reg flush_W;
+	reg [(DBITS-1):0] pcgood_M;
+	reg [(DBITS-1):0] pcgood_W;
+	//reg [1:0] predodds_A;
 	
 	always @(posedge clk) begin
 		//predodds_A<=predodds;
 		//initial regval1_A and regval2_A assignments handle RAW data hazard
-		case (sreg1_mux)
-			2'b11:
-				regval1_A<=wregval_W;
-			2'b10 :
-				regval1_A<=wregval_M;
-			2'b01 :
-				regval1_A<=aluout_A;
-			2'b00 :
-				regval1_A<=regs[rregno1_D];
-		endcase
+		regval1_A<=	(sreg1_mux==2'b0)?regs[rregno1_D]:
+						(sreg1_mux==2'b01)?aluout_A:
+						(sreg1_mux==2'b10)?wregval_M:
+						wregval_W; //assume sreg1_mux==11
 		regval1_M<=regval1_A;
 		regval1_W<=regval1_M;
-		case (sreg2_mux)
-			2'b11:
-				regval2_A<=wregval_W;
-			2'b10 :
-				regval2_A<=wregval_M;
-			2'b01 :
-				regval2_A<=aluout_A;
-			2'b00 :
-				regval2_A<=regs[rregno2_D];
-		endcase
+		regval2_A<=	(sreg2_mux==2'b0)?regs[rregno2_D]:
+						(sreg2_mux==2'b01)?aluout_A:
+						(sreg2_mux==2'b10)?wregval_M:
+						wregval_W; //assume sreg2_mux==11
 		
 		regval2_M<=regval2_A;
 		regval2_W<=regval2_M;
@@ -475,8 +468,13 @@ module Project(
 		wregval_W<=wregval_M;
 		PC_A<=PC;
 		PC_M<=PC_A;
+		PC_W<=PC_M;
 		pcpred_A<=pcpred_D;
-		flush_A<=flush_D;
+		flush_A<=flush_D|stall;
+		flush_M<=flush_A;
+		flush_W<=flush_M;
+		pcgood_M<=pcgood_A;
+		pcgood_W<=pcgood_M;
 	end
 	wire mnop = (isnop_M |wrmem_M);
 	wire anop = (isnop_A |wrmem_A);
