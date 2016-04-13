@@ -28,7 +28,7 @@ module Project(
   parameter ADDRTCNT	=32'hFFFF0100;
   parameter ADDRTLIM	=32'hFFFF0104;
   parameter ADDRTCTL	=32'hFFFF0108;
-  parameter IMEMINITFILE="Test2.mif";
+  parameter IMEMINITFILE="Sorter3.mif";
   parameter IMEMADDRBITS=16;
   parameter IMEMWORDBITS=2;
   parameter IMEMWORDS=(1<<(IMEMADDRBITS-IMEMWORDBITS));
@@ -154,10 +154,12 @@ module Project(
 	// This is the predicted value of the PC
 	// that we used to fetch the next instruction
 	//wire [(DBITS+1):0] predval=bpred[PC[(DBITS-1):0]];
-	wire [(DBITS-1):0] prediction=bpred[PC[5:0]];
+	
+	//*wire [(DBITS-1):0] prediction=bpred[PC[5:0]];
+	
 	//wire [1:0] predodds=predval[(DBITS+1):(DBITS)];
-	wire [(DBITS-1):0] pcpred_F=(prediction!=32'd0)?prediction:pcplus_F;
-	//wire [(DBITS-1):0] pcpred_F=pcplus_F;
+	//*wire [(DBITS-1):0] pcpred_F=(prediction!=32'd0)?prediction:pcplus_F;
+	wire [(DBITS-1):0] pcpred_F=pcplus_F;
 	
 	// Instruction-fetch
 	(* ram_init_file = IMEMINITFILE *)
@@ -239,19 +241,22 @@ module Project(
 					(alufunc_A==OP1_BNE)?{31'b0,aluin1_A!=aluin2_A}:
 					(alufunc_A==OP1_BLT)?{31'b0,aluin1_A<aluin2_A}:
 					{31'b0,aluin1_A<=aluin2_A}; //else BLE
-	assign alu_eq=	(alufunc_A==OP2_EQ)?{31'b0,aluin1_A==aluin2_A}:
+	assign alu_eq=	(isbranch_A)?{32'b0}:
+					(alufunc_A==OP2_EQ)?{31'b0,aluin1_A==aluin2_A}:
 					(alufunc_A==OP2_NE)?{31'b0,aluin1_A!=aluin2_A}:
 					(alufunc_A==OP2_LT)?{31'b0,aluin1_A<aluin2_A}:
 					(alufunc_A==OP2_LE)?{31'b0,aluin1_A<=aluin2_A}:
 					{32'b0};
-	assign alu_log=	(alufunc_A==OP2_AND)?{aluin1_A&aluin2_A}:
+	assign alu_log=	(isbranch_A)?{32'b0}:
+					(alufunc_A==OP2_AND)?{aluin1_A&aluin2_A}:
 					(alufunc_A==OP2_OR)?{aluin1_A|aluin2_A}:
 					(alufunc_A==OP2_XOR)?{aluin1_A^aluin2_A}:
 					(alufunc_A==OP2_NAND)?{~(aluin1_A&aluin2_A)}:
 					(alufunc_A==OP2_NOR)?{~(aluin1_A|aluin2_A)}:
 					(alufunc_A==OP2_NXOR)?{~(aluin1_A^aluin2_A)}:
 					{32'b0};
-	assign alu_mth=	(alufunc_A==OP2_ADD)?{aluin1_A+aluin2_A}:
+	assign alu_mth=	(isbranch_A)?{32'b0}:
+					(alufunc_A==OP2_ADD)?{aluin1_A+aluin2_A}:
 					(alufunc_A==OP2_SUB)?{aluin1_A-aluin2_A}:
 					{32'b0};
 	
@@ -275,15 +280,15 @@ module Project(
 	wire [(DBITS-1):0] pcgood_B=pcgood_A;
 	
 	//wire [1:0] newpredodds=mispred_B?predodds_A+2'd1:predodds_A;
-	integer i;
+	/*integer i;
 	always @(posedge clk or posedge reset) begin
 		if(reset) begin
 		for(i=0;i<4;i=i+1)
 			bpred[i]<=32'd0;
 		end else
-			if(mispred_B)
-				bpred[PC_A[3:0]] <= pcgood_B;
-	end
+			if(mispred_B_W)
+				bpred[PC_W[3:0]] <= pcgood_W;
+	end*/
 	
 	wire flush_D=(mispred_B|isjump_A);
 	
@@ -402,27 +407,29 @@ module Project(
 	reg [(REGNOBITS-1):0] sreg2_W;
 	reg [(DBITS-1):0] wregval_W;
 	wire [(REGNOBITS-1):0] dreg_D=(aluimm_D|isjump_D)?rt_D:rd_D;
-	reg [(DBITS-1):0] PC_A;
-	reg [(DBITS-1):0] PC_M;
-	reg [(DBITS-1):0] PC_W;
-	reg [(DBITS-1):0] pcgood_M;
-	reg [(DBITS-1):0] pcgood_W;
-	reg mispred_B_M;
-	reg mispred_B_W;
+	//reg [(DBITS-1):0] PC_A;
+	//reg [(DBITS-1):0] PC_M;
+	//reg [(DBITS-1):0] PC_W;
+	//reg [(DBITS-1):0] pcgood_M;
+	//reg [(DBITS-1):0] pcgood_W;
+	//reg mispred_B_M;
+	//reg mispred_B_W;
 	reg [(OP1BITS-1):0] opcode_A;
-	reg [(OP1BITS-1):0] opcode_M;
+	//reg [(OP1BITS-1):0] opcode_M;
 	//reg [1:0] predodds_A;
 	
 	always @(posedge clk) begin
 		//predodds_A<=predodds;
 		//initial regval1_A and regval2_A assignments handle RAW data hazard
-		regval1_A<=	(sreg1_mux==2'b0)?regs[rregno1_D]:
+		regval1_A<=	(flush_D)?0:
+						(sreg1_mux==2'b0)?regs[rregno1_D]:
 						(sreg1_mux==2'b01)?aluout_A:
 						(sreg1_mux==2'b10)?wregval_M:
 						wregval_W; //assume sreg1_mux==11
 		regval1_M<=regval1_A;
 		regval1_W<=regval1_M;
-		regval2_A<=	(sreg2_mux==2'b0)?regs[rregno2_D]:
+		regval2_A<=	(flush_D)?0:
+						(sreg2_mux==2'b0)?regs[rregno2_D]:
 						(sreg2_mux==2'b01)?aluout_A:
 						(sreg2_mux==2'b10)?wregval_M:
 						wregval_W; //assume sreg2_mux==11
@@ -467,14 +474,14 @@ module Project(
 		sreg2_W<=sreg2_M;
 		aluimm_A<=(stall)?0:aluimm_D;
 		wregval_W<=wregval_M;
-		PC_A<=PC;
-		PC_M<=PC_A;
-		PC_W<=PC_M;
+		//PC_A<=PC;
+		//PC_M<=PC_A;
+		//PC_W<=PC_M;
 		pcpred_A<=pcpred_D;
-		pcgood_M<=pcgood_B;
-		pcgood_W<=pcgood_M;
-		mispred_B_M<=mispred_B;
-		mispred_B_W<=mispred_B_M;
+		//pcgood_M<=pcgood_B;
+		//pcgood_W<=pcgood_M;
+		//mispred_B_M<=mispred_B;
+		//mispred_B_W<=mispred_B_M;
 		aluout_M<=aluout_A;
 		pcplus_M<=pcplus_A;
 	end
@@ -490,10 +497,10 @@ module Project(
   wire M2;
   wire W1;
   wire W2;
-	 assign sreg1_mux[0]= (A1 || W1);
-	 assign sreg1_mux[1]= (M1 || W1);
-	 assign sreg2_mux[0]= (A2 || W2);
-	 assign sreg2_mux[1]= (M2 || W2);
+	 assign sreg1_mux= {(M1 || W1),(A1 || W1)};
+	 //assign sreg1_mux[1]= (M1 || W1);
+	 assign sreg2_mux= {(M2 || W2),(A2 || W2)};
+	 //assign sreg2_mux[1]= (M2 || W2);
   Funit forward (
     .sreg1		(rregno1_D),
 	 .sreg2		(rregno2_D),
