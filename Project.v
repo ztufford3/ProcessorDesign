@@ -154,9 +154,9 @@ module Project(
 	// This is the predicted value of the PC
 	// that we used to fetch the next instruction
 	//wire [(DBITS+1):0] predval=bpred[PC[(DBITS-1):0]];
-	wire [(DBITS-1):0] prediction=bpred[PC[3:0]];
+	wire [(DBITS-1):0] prediction=bpred[PC[5:0]];
 	//wire [1:0] predodds=predval[(DBITS+1):(DBITS)];
-	wire [(DBITS-1):0] pcpred_F=(prediction!=0)?prediction:pcplus_F;
+	wire [(DBITS-1):0] pcpred_F=(prediction!=32'd0)?prediction:pcplus_F;
 	//wire [(DBITS-1):0] pcpred_F=pcplus_F;
 	
 	// Instruction-fetch
@@ -281,9 +281,8 @@ module Project(
 		for(i=0;i<4;i=i+1)
 			bpred[i]<=32'd0;
 		end else
-			if(!flush_W) begin
-				bpred[PC_W[3:0]] <= pcgood_W;
-			end
+			if(mispred_B)
+				bpred[PC_A[3:0]] <= pcgood_B;
 	end
 	
 	wire flush_D=(mispred_B|isjump_A);
@@ -297,9 +296,6 @@ module Project(
 			memaddr_M<={(DBITS){1'bX}};
 	
 	reg [(DBITS-1):0] aluout_M,pcplus_M;
-	always @(posedge clk)
-		{aluout_M,pcplus_M}<=
-		{aluout_A,pcplus_A};
 	
 	reg [23:0] HexOut;
 	reg [9:0] LedrOut;
@@ -318,8 +314,12 @@ module Project(
 		else begin
 			if(wrmem_M&&(memaddr_M==ADDRHEX))
 				HexOut[23:0] <= wmemval_M[23:0];
+			//HexOut[23:12] <= PC_A[11:0];
+			//HexOut[11:0] <= pcgood_B[11:0];
 			if(wrmem_M&&(memaddr_M==ADDRLEDR))
 				LedrOut <= wmemval_M[9:0];
+			//LedrOut[9]<=stall;
+			//LedrOut[8]<=mispred_B;
 		end
 	end
 
@@ -405,11 +405,12 @@ module Project(
 	reg [(DBITS-1):0] PC_A;
 	reg [(DBITS-1):0] PC_M;
 	reg [(DBITS-1):0] PC_W;
-	reg flush_A;
-	reg flush_M;
-	reg flush_W;
 	reg [(DBITS-1):0] pcgood_M;
 	reg [(DBITS-1):0] pcgood_W;
+	reg mispred_B_M;
+	reg mispred_B_W;
+	reg [(OP1BITS-1):0] opcode_A;
+	reg [(OP1BITS-1):0] opcode_M;
 	//reg [1:0] predodds_A;
 	
 	always @(posedge clk) begin
@@ -451,10 +452,10 @@ module Project(
 		isnop_A<=(stall)?1'b1:isnop_D;
 		isnop_M<=isnop_A;
 		isnop_W<=isnop_M;
-		pcplus_A<=(stall)?0:pcplus_D;
+		pcplus_A<=pcplus_D;
 		pcplus_W<=pcplus_M;
-		workingimm_A<=(stall)?0:workingimm_D;
-		alufunc_A<=alufunc_D;
+		workingimm_A<=workingimm_D;
+		alufunc_A<=(stall)?0:alufunc_D;
 		dreg_A<=(stall)?0:dreg_D;
 		dreg_M<=dreg_A;
 		dreg_W<=dreg_M;
@@ -470,11 +471,12 @@ module Project(
 		PC_M<=PC_A;
 		PC_W<=PC_M;
 		pcpred_A<=pcpred_D;
-		flush_A<=flush_D|stall;
-		flush_M<=flush_A;
-		flush_W<=flush_M;
-		pcgood_M<=pcgood_A;
+		pcgood_M<=pcgood_B;
 		pcgood_W<=pcgood_M;
+		mispred_B_M<=mispred_B;
+		mispred_B_W<=mispred_B_M;
+		aluout_M<=aluout_A;
+		pcplus_M<=pcplus_A;
 	end
 	wire mnop = (isnop_M |wrmem_M);
 	wire anop = (isnop_A |wrmem_A);
@@ -498,7 +500,7 @@ module Project(
 	 .mnop		(mnop),
 	 .anop		(anop),
 	 .wnop		(wnop),
-	 .EX_LW		(selmemout_A),
+	 .EX_LW		(selmemout_A&&!flush_D),
 	 .setBusy	(dreg_D),
 	 .dreg_W		(dreg_W),
 	 .dreg_A		(dreg_A),
