@@ -68,7 +68,7 @@ module Project(
   parameter FREQ = 10'd50;
   parameter MILLISEC = FREQ*24'd10000;
   
-  parameter BPREDBITS = 5;
+  parameter BPREDBITS = 2;
   
 	reg [3:0] oldkey=4'b1111;
 	wire key0press={oldkey[0],KEY[0]}==2'b00;
@@ -107,7 +107,7 @@ module Project(
     .locked   (locked)
   );
   wire reset=!locked;
-  reg [(DBITS-1):0] bpred[((1<<BPREDBITS)-1):0];
+  reg [(DBITS-1):0] bpred[7:0];
   //assign clk=!KEY[0];
   
   //made switch debouncer arbitrarily large
@@ -156,7 +156,7 @@ module Project(
 	// This is the predicted value of the PC
 	// that we used to fetch the next instruction
 	//wire [(DBITS+1):0] predval=bpred[PC[(DBITS-1):0]];
-	wire [(DBITS-1):0] prediction=bpred[(PC)%(1<<BPREDBITS)];
+	wire [(DBITS-1):0] prediction=bpred[(PC[7:0])];
 	//wire [1:0] predodds=predval[(DBITS+1):(DBITS)];
 	wire [(DBITS-1):0] pcpred_F=(prediction!=32'd0)?prediction:pcplus_F;
 	//wire [(DBITS-1):0] pcpred_F=pcplus_F;
@@ -283,11 +283,11 @@ module Project(
 	integer i;
 	always @(posedge clk or posedge reset) begin
 		if(reset) begin
-		for(i=0;i<(1<<BPREDBITS);i=i+1)
+		for(i=0;i<8;i=i+1)
 			bpred[i]<=32'd0;
 		end else
 			if(mispred_B_W || prediction_W&&!isnop_W)
-				bpred[(PC_W)%(1<<BPREDBITS)] <= pcgood_W;
+				bpred[(PC_W[7:0])] <= pcgood_W;
 	end
 	
 	wire flush_D=(mispred_B|isjump_A);
@@ -319,11 +319,15 @@ module Project(
 		else begin
 			if(wrmem_M&&(memaddr_M==ADDRHEX))
 				HexOut[23:0] <= wmemval_M[23:0];
-			//HexOut[23:12] <= PC_A[11:0];
-			//HexOut[11:0] <= pcpred_A[11:0];
+			//HexOut[23:12] <= aluin1_A[11:0];
+			//HexOut[11:0] <= aluin2_A[11:0];
 			if(wrmem_M&&(memaddr_M==ADDRLEDR))
 				LedrOut <= wmemval_M[9:0];
+			//else
+				//LedrOut<=0;
 			//LedrOut[9]<=mispred_B;
+			//LedrOut[8]<=isjump_A;
+			//LedrOut[7]<=isbranch_A;
 			//LedrOut[8]<=prediction_A;
 		end
 	end
