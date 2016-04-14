@@ -68,6 +68,8 @@ module Project(
   parameter FREQ = 10'd50;
   parameter MILLISEC = FREQ*24'd10000;
   
+  parameter BPREDBITS = 5;
+  
 	reg [3:0] oldkey=4'b1111;
 	wire key0press={oldkey[0],KEY[0]}==2'b00;
 	wire key1press={oldkey[1],KEY[1]}==2'b00;
@@ -105,7 +107,7 @@ module Project(
     .locked   (locked)
   );
   wire reset=!locked;
-  reg [(DBITS-1):0] bpred[3:0];
+  reg [(DBITS-1):0] bpred[((1<<BPREDBITS)-1):0];
   //assign clk=!KEY[0];
   
   //made switch debouncer arbitrarily large
@@ -154,12 +156,10 @@ module Project(
 	// This is the predicted value of the PC
 	// that we used to fetch the next instruction
 	//wire [(DBITS+1):0] predval=bpred[PC[(DBITS-1):0]];
-	
-	//*wire [(DBITS-1):0] prediction=bpred[PC[5:0]];
-	
+	wire [(DBITS-1):0] prediction=bpred[(PC)%(1<<BPREDBITS)];
 	//wire [1:0] predodds=predval[(DBITS+1):(DBITS)];
-	//*wire [(DBITS-1):0] pcpred_F=(prediction!=32'd0)?prediction:pcplus_F;
-	wire [(DBITS-1):0] pcpred_F=pcplus_F;
+	wire [(DBITS-1):0] pcpred_F=(prediction!=32'd0)?prediction:pcplus_F;
+	//wire [(DBITS-1):0] pcpred_F=pcplus_F;
 	
 	// Instruction-fetch
 	(* ram_init_file = IMEMINITFILE *)
@@ -280,15 +280,15 @@ module Project(
 	wire [(DBITS-1):0] pcgood_B=pcgood_A;
 	
 	//wire [1:0] newpredodds=mispred_B?predodds_A+2'd1:predodds_A;
-	/*integer i;
+	integer i;
 	always @(posedge clk or posedge reset) begin
 		if(reset) begin
-		for(i=0;i<4;i=i+1)
+		for(i=0;i<(1<<BPREDBITS);i=i+1)
 			bpred[i]<=32'd0;
 		end else
-			if(mispred_B_W)
-				bpred[PC_W[3:0]] <= pcgood_W;
-	end*/
+			if(mispred_B_W || prediction_W&&!isnop_W)
+				bpred[(PC_W)%(1<<BPREDBITS)] <= pcgood_W;
+	end
 	
 	wire flush_D=(mispred_B|isjump_A);
 	
@@ -320,11 +320,11 @@ module Project(
 			if(wrmem_M&&(memaddr_M==ADDRHEX))
 				HexOut[23:0] <= wmemval_M[23:0];
 			//HexOut[23:12] <= PC_A[11:0];
-			//HexOut[11:0] <= pcgood_B[11:0];
+			//HexOut[11:0] <= pcpred_A[11:0];
 			if(wrmem_M&&(memaddr_M==ADDRLEDR))
 				LedrOut <= wmemval_M[9:0];
-			//LedrOut[9]<=stall;
-			//LedrOut[8]<=mispred_B;
+			//LedrOut[9]<=mispred_B;
+			//LedrOut[8]<=prediction_A;
 		end
 	end
 
@@ -407,18 +407,25 @@ module Project(
 	reg [(REGNOBITS-1):0] sreg2_W;
 	reg [(DBITS-1):0] wregval_W;
 	wire [(REGNOBITS-1):0] dreg_D=(aluimm_D|isjump_D)?rt_D:rd_D;
-	//reg [(DBITS-1):0] PC_A;
-	//reg [(DBITS-1):0] PC_M;
-	//reg [(DBITS-1):0] PC_W;
-	//reg [(DBITS-1):0] pcgood_M;
-	//reg [(DBITS-1):0] pcgood_W;
-	//reg mispred_B_M;
-	//reg mispred_B_W;
+	reg [(DBITS-1):0] PC_A;
+	reg [(DBITS-1):0] PC_M;
+	reg [(DBITS-1):0] PC_W;
+	reg [(DBITS-1):0] pcgood_M;
+	reg [(DBITS-1):0] pcgood_W;
+	reg mispred_B_M;
+	reg mispred_B_W;
 	reg [(OP1BITS-1):0] opcode_A;
-	//reg [(OP1BITS-1):0] opcode_M;
+	reg [(OP1BITS-1):0] opcode_M;
 	//reg [1:0] predodds_A;
+	reg prediction_A;
+	reg prediction_M;
+	reg prediction_W;
 	
 	always @(posedge clk) begin
+		prediction_A<=(prediction==0)&&!isnop_D;
+		prediction_M<=prediction_A&&!isnop_A;
+		prediction_W<=prediction_M&&isnop_M;
+	
 		//predodds_A<=predodds;
 		//initial regval1_A and regval2_A assignments handle RAW data hazard
 		regval1_A<=	(flush_D)?0:
@@ -474,14 +481,14 @@ module Project(
 		sreg2_W<=sreg2_M;
 		aluimm_A<=(stall)?0:aluimm_D;
 		wregval_W<=wregval_M;
-		//PC_A<=PC;
-		//PC_M<=PC_A;
-		//PC_W<=PC_M;
+		PC_A<=PC;
+		PC_M<=PC_A;
+		PC_W<=PC_M;
 		pcpred_A<=pcpred_D;
-		//pcgood_M<=pcgood_B;
-		//pcgood_W<=pcgood_M;
-		//mispred_B_M<=mispred_B;
-		//mispred_B_W<=mispred_B_M;
+		pcgood_M<=pcgood_B;
+		pcgood_W<=pcgood_M;
+		mispred_B_M<=mispred_B;
+		mispred_B_W<=mispred_B_M;
 		aluout_M<=aluout_A;
 		pcplus_M<=pcplus_A;
 	end
