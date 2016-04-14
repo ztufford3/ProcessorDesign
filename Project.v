@@ -28,7 +28,7 @@ module Project(
   parameter ADDRTCNT	=32'hFFFF0100;
   parameter ADDRTLIM	=32'hFFFF0104;
   parameter ADDRTCTL	=32'hFFFF0108;
-  parameter IMEMINITFILE="Sorter3.mif";
+  parameter IMEMINITFILE="Test2.mif";
   parameter IMEMADDRBITS=16;
   parameter IMEMWORDBITS=2;
   parameter IMEMWORDS=(1<<(IMEMADDRBITS-IMEMWORDBITS));
@@ -168,9 +168,9 @@ module Project(
 	
   	// If fetch and decoding stages are the same stage,
 	// just connect signals from fetch to decode
-	wire [(DBITS-1):0] inst_D=inst_F;
-	wire [(DBITS-1):0] pcplus_D=pcplus_F;
-	wire [(DBITS-1):0] pcpred_D=pcpred_F;
+	reg [(DBITS-1):0] inst_D;
+	reg [(DBITS-1):0] pcplus_D;
+	reg [(DBITS-1):0] pcpred_D;
 	// Instruction decoding
 	// These have zero delay from inst_D
 	// because they are just new names for those signals
@@ -192,6 +192,13 @@ module Project(
 	reg [(REGNOBITS-1):0] wregno_D;
 	reg wrreg_D;
 	wire stall_F;
+	
+	always @(posedge clk) begin
+		inst_D<=(!stall)?inst_F:inst_D;
+		pcpred_D<=(!stall)?pcpred_F:pcpred_D;
+		pcplus_D<=(!stall)?pcplus_F:pcplus_D;
+		flush_F<=mispred_B||isjump_A;
+	end
 	
 	// Register-read
 	reg [(DBITS-1):0] regs[(REGWORDS-1):0];
@@ -289,8 +296,8 @@ module Project(
 			if(mispred_B_W || prediction_W&&!isnop_W)
 				bpred[(PC_W[7:0])] <= pcgood_W;
 	end
-	
-	wire flush_D=(mispred_B|isjump_A);
+	reg flush_F;
+	wire flush_D=(mispred_B|isjump_A)|flush_F;
 	
 	reg [(DBITS-1):0] memaddr_M;
 	wire [(DBITS-1):0] wmemval_M=wrmem_M?regval2_M:{(DBITS){1'bX}};
@@ -319,12 +326,15 @@ module Project(
 		else begin
 			if(wrmem_M&&(memaddr_M==ADDRHEX))
 				HexOut[23:0] <= wmemval_M[23:0];
-			//HexOut[23:12] <= aluin1_A[11:0];
-			//HexOut[11:0] <= aluin2_A[11:0];
+			//if(wrmem_M&&(memaddr_M!=ADDRLEDR))
+				//HexOut <= memaddr_M;
+			//else begin
+				//HexOut[23:12] <= aluin1_A[11:0];
+				//HexOut[11:0] <= aluin2_A[11:0];
 			if(wrmem_M&&(memaddr_M==ADDRLEDR))
 				LedrOut <= wmemval_M[9:0];
-			//else
-				//LedrOut<=0;
+			//LedrOut[9] <= wrmem_A&&(aluout_A!=ADDRLEDR);
+			//LedrOut[8] <= wrmem_M&&(memaddr_M!=ADDRLEDR);
 			//LedrOut[9]<=mispred_B;
 			//LedrOut[8]<=isjump_A;
 			//LedrOut[7]<=isbranch_A;
@@ -411,6 +421,7 @@ module Project(
 	reg [(REGNOBITS-1):0] sreg2_W;
 	reg [(DBITS-1):0] wregval_W;
 	wire [(REGNOBITS-1):0] dreg_D=(aluimm_D|isjump_D)?rt_D:rd_D;
+	reg [(DBITS-1):0] PC_D;
 	reg [(DBITS-1):0] PC_A;
 	reg [(DBITS-1):0] PC_M;
 	reg [(DBITS-1):0] PC_W;
@@ -485,7 +496,8 @@ module Project(
 		sreg2_W<=sreg2_M;
 		aluimm_A<=(stall)?0:aluimm_D;
 		wregval_W<=wregval_M;
-		PC_A<=PC;
+		PC_D<=PC;
+		PC_A<=PC_D;
 		PC_M<=PC_A;
 		PC_W<=PC_M;
 		pcpred_A<=pcpred_D;
