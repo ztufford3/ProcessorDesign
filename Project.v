@@ -68,8 +68,6 @@ module Project(
   parameter FREQ = 10'd50;
   parameter MILLISEC = FREQ*24'd10000;
   
-  parameter BPREDBITS = 2;
-  
 	reg [3:0] oldkey=4'b1111;
 	wire key0press={oldkey[0],KEY[0]}==2'b00;
 	wire key1press={oldkey[1],KEY[1]}==2'b00;
@@ -197,7 +195,7 @@ module Project(
 		inst_D<=(!stall)?inst_F:inst_D;
 		pcpred_D<=(!stall)?pcpred_F:pcpred_D;
 		pcplus_D<=(!stall)?pcplus_F:pcplus_D;
-		flush_F<=mispred_B||isjump_A;
+		flush_F<=mispred_B||isjump_M;
 	end
 	
 	// Register-read
@@ -278,26 +276,39 @@ module Project(
 	
 	reg [(DBITS-1):0] pcpred_A;
 	
-	wire [(DBITS-1):0] pcgood_A=
-		dobranch_A?brtarg_A:
-		isjump_A?jmptarg_A:
-		pcplus_A;
-	wire mispred_A=(pcgood_A!=pcpred_A);
-	wire mispred_B=mispred_A&&!isnop_A;
-	wire [(DBITS-1):0] pcgood_B=pcgood_A;
+	wire [(DBITS-1):0] pcgood_M=
+		dobranch_M?brtarg_M:
+		isjump_M?jmptarg_M:
+		pcplus_M;
+	wire mispred_M=(pcgood_M!=pcpred_M);
+	wire mispred_B=mispred_M&&!isnop_M;
+	wire [(DBITS-1):0] pcgood_B=pcgood_M;
+	
+	reg [(DBITS-1):0] brtarg_M;
+	reg [(DBITS-1):0] jmptarg_M;
+	reg dobranch_M;
+	reg isjump_M;
+	
+	always @(posedge clk) begin
+		brtarg_M<=(!flush_A)?brtarg_A:0;
+		jmptarg_M<=(!flush_A)?jmptarg_A:0;
+		dobranch_M<=(!flush_A)?dobranch_A:0;
+		isjump_M<=(!flush_A)?isjump_A:0;
+	end
 	
 	//wire [1:0] newpredodds=mispred_B?predodds_A+2'd1:predodds_A;
 	integer i;
 	always @(posedge clk or posedge reset) begin
 		if(reset) begin
-		for(i=0;i<8;i=i+1)
-			bpred[i]<=32'd0;
+			for(i=0;i<8;i=i+1)
+				bpred[i]<=32'd0;
 		end else
 			if(mispred_B_W || prediction_W&&!isnop_W)
 				bpred[(PC_W[7:0])] <= pcgood_W;
 	end
 	reg flush_F;
-	wire flush_D=(mispred_B|isjump_A)|flush_F;
+	wire flush_D=(mispred_B|isjump_M)|flush_F;
+	wire flush_A=(mispred_B|isjump_M);
 	
 	reg [(DBITS-1):0] memaddr_M;
 	wire [(DBITS-1):0] wmemval_M=wrmem_M?regval2_M:{(DBITS){1'bX}};
@@ -326,19 +337,8 @@ module Project(
 		else begin
 			if(wrmem_M&&(memaddr_M==ADDRHEX))
 				HexOut[23:0] <= wmemval_M[23:0];
-			//if(wrmem_M&&(memaddr_M!=ADDRLEDR))
-				//HexOut <= memaddr_M;
-			//else begin
-				//HexOut[23:12] <= aluin1_A[11:0];
-				//HexOut[11:0] <= aluin2_A[11:0];
 			if(wrmem_M&&(memaddr_M==ADDRLEDR))
 				LedrOut <= wmemval_M[9:0];
-			//LedrOut[9] <= wrmem_A&&(aluout_A!=ADDRLEDR);
-			//LedrOut[8] <= wrmem_M&&(memaddr_M!=ADDRLEDR);
-			//LedrOut[9]<=mispred_B;
-			//LedrOut[8]<=isjump_A;
-			//LedrOut[7]<=isbranch_A;
-			//LedrOut[8]<=prediction_A;
 		end
 	end
 
@@ -425,9 +425,8 @@ module Project(
 	reg [(DBITS-1):0] PC_A;
 	reg [(DBITS-1):0] PC_M;
 	reg [(DBITS-1):0] PC_W;
-	reg [(DBITS-1):0] pcgood_M;
 	reg [(DBITS-1):0] pcgood_W;
-	reg mispred_B_M;
+	reg [(DBITS-1):0] pcpred_M;
 	reg mispred_B_W;
 	reg [(OP1BITS-1):0] opcode_A;
 	reg [(OP1BITS-1):0] opcode_M;
@@ -438,7 +437,7 @@ module Project(
 	
 	always @(posedge clk) begin
 		prediction_A<=(prediction==0)&&!isnop_D;
-		prediction_M<=prediction_A&&!isnop_A;
+		prediction_M<=prediction_A&&!isnop_A&&!flush_A;
 		prediction_W<=prediction_M&&isnop_M;
 	
 		//predodds_A<=predodds;
@@ -459,40 +458,41 @@ module Project(
 		regval2_M<=regval2_A;
 		regval2_W<=regval2_M;
 		wregno_A<=(stall)?0:wregno_D;
-		wregno_M<=wregno_A;
+		wregno_M<=(!flush_A)?wregno_A:0;
 		wregno_W<=wregno_M;
 		wrreg_A<=(stall)?0:wrreg_D;
-		wrreg_M<=wrreg_A;
+		wrreg_M<=(!flush_A)?wrreg_A:0;
 		wrreg_W<=wrreg_M;
 		wrmem_A<=(stall)?0:wrmem_D;
-		wrmem_M<=wrmem_A;
+		wrmem_M<=(!flush_A)?wrmem_A:0;
 		wrmem_W<=wrmem_M;
 		isbranch_A<=(stall)?0:isbranch_D;
 		isjump_A<=(stall)?0:isjump_D;
 		selaluout_A<=(stall)?0:selaluout_D;
-		selaluout_M<=selaluout_A;
+		selaluout_M<=(!flush_A)?selaluout_A:0;
 		selaluout_W<=selaluout_M;
 		selmemout_A<=(stall)?0:selmemout_D;
-		selmemout_M<=selmemout_A;
+		selmemout_M<=(!flush_A)?selmemout_A:0;
 		selmemout_W<=selmemout_M;
 		selpcplus_A<=(stall)?0:selpcplus_D;
-		selpcplus_M<=selpcplus_A;
+		selpcplus_M<=(!flush_A)?selpcplus_A:0;
 		selpcplus_W<=selpcplus_M;
 		isnop_A<=(stall)?1'b1:isnop_D;
-		isnop_M<=isnop_A;
+		isnop_M<=(!flush_A)?isnop_A:1'b1;
 		isnop_W<=isnop_M;
 		pcplus_A<=pcplus_D;
+		pcplus_M<=pcplus_A;
 		pcplus_W<=pcplus_M;
 		workingimm_A<=workingimm_D;
 		alufunc_A<=(stall)?0:alufunc_D;
 		dreg_A<=(stall)?0:dreg_D;
-		dreg_M<=dreg_A;
+		dreg_M<=(!flush_A)?dreg_A:0;
 		dreg_W<=dreg_M;
 		sreg1_A<=(stall)?0:rs_D;
-		sreg1_M<=sreg1_A;
+		sreg1_M<=(!flush_A)?sreg1_A:0;
 		sreg1_W<=sreg1_M;
 		sreg2_A<=(stall)?0:rt_D;
-		sreg2_M<=sreg2_A;
+		sreg2_M<=(!flush_A)?sreg2_A:0;
 		sreg2_W<=sreg2_M;
 		aluimm_A<=(stall)?0:aluimm_D;
 		wregval_W<=wregval_M;
@@ -501,15 +501,13 @@ module Project(
 		PC_M<=PC_A;
 		PC_W<=PC_M;
 		pcpred_A<=pcpred_D;
-		pcgood_M<=pcgood_B;
-		pcgood_W<=pcgood_M;
-		mispred_B_M<=mispred_B;
-		mispred_B_W<=mispred_B_M;
+		pcpred_M<=pcpred_A;
+		pcgood_W<=pcgood_B;
+		mispred_B_W<=mispred_B;
 		aluout_M<=aluout_A;
-		pcplus_M<=pcplus_A;
 	end
 	wire mnop = (isnop_M |wrmem_M);
-	wire anop = (isnop_A |wrmem_A);
+	wire anop = (isnop_A |wrmem_A	|flush_A);
 	wire wnop = (isnop_W |wrmem_W);
   wire [1:0] sreg1_mux; //0 should drive regfile, 1 should drive aluout and 2 should drive Memout
   wire [1:0] sreg2_mux;
