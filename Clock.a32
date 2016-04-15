@@ -1,0 +1,55 @@
+; Addresses for I/O
+.NAME	HEX= 0xFFFFF000
+.NAME	LEDR=0xFFFFF020
+.NAME	KEY= 0xFFFFF080
+.NAME	SW=  0xFFFFF090
+.NAME TCNT=0xFFFFF100
+.NAME TLIM=0xFFFFF104
+.NAME TCTL=0xFFFFF108
+
+
+
+	.ORIG 0x100
+	ADDI a0,Zero,1000
+	ADDI a1,Zero,59
+	ADDI a7,Zero,15104
+	ADDI a2,Zero,1507328
+	ADDI a3,Zero,1
+	ADDI a4,Zero,16711680
+	ADDI a5,Zero,65280
+	ADDI a6,Zero,255
+	SW a0,TLIM(Zero)
+	SW Zero,TCTL(Zero)
+ClockLoop:
+	LW s1,TCTL(Zero)
+	BGT s1,Zero,IncSec
+	BR   ClockLoop
+IncSec:
+	LW s2,TCNT(Zero)
+	AND s3,s2,a6
+	BEQ s3,a1,IncSec
+	ADDI s2,s2,1
+	ADDI s1,Zero,0
+	SW s2,TCNT(Zero)
+	SW s1,TCTL(Zero)
+	BR ClockLoop
+IncMin:
+	AND s4,s2,a5
+	BEQ s4,a7,IncHour
+	ADDI s2,s2,197
+	ADDI s1,Zero,0
+	SW s2,TCNT(Zero)
+	SW s1,TCTL(Zero)
+	BR ClockLoop
+IncHour:
+	AND s5,s2,a4
+	BEQ s5,a2,SetZero
+	ADDI s2,s2,50373
+	ADDI s1,Zero,0
+	SW s2,TCNT(Zero)
+	SW s1,TCTL(Zero)
+	BR ClockLoop
+SetZero:
+	SW Zero,TCNT(Zero)
+	SW Zero,TCTL(Zero)
+	BR ClockLoop
