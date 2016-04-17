@@ -28,7 +28,7 @@ module Project(
   parameter ADDRTCNT	=32'hFFFF0100;
   parameter ADDRTLIM	=32'hFFFF0104;
   parameter ADDRTCTL	=32'hFFFF0108;
-  parameter IMEMINITFILE="Test2.mif";
+  parameter IMEMINITFILE="Sorter3.mif";
   parameter IMEMADDRBITS=16;
   parameter IMEMWORDBITS=2;
   parameter IMEMWORDS=(1<<(IMEMADDRBITS-IMEMWORDBITS));
@@ -49,6 +49,7 @@ module Project(
   parameter OP1_ANDI =6'b100100;
   parameter OP1_ORI  =6'b100101;
   parameter OP1_XORI =6'b100110;
+  parameter ADDROP	=3'b001;
   
   parameter OP2BITS=6;
   parameter OP2_EQ   =OP1_BEQ;
@@ -105,7 +106,7 @@ module Project(
     .locked   (locked)
   );
   wire reset=!locked;
-  reg [(DBITS-1):0] bpred[7:0];
+  reg [(DBITS-1):0] bpred [64:0];
   //assign clk=!KEY[0];
   
   //made switch debouncer arbitrarily large
@@ -149,14 +150,16 @@ module Project(
 	else if(!stall)
 		PC<=pcpred_F;
 	end
+	
+	wire [5:0] PC_X=PC[7:2];
 	// This is the value of "incremented PC", computed in stage 1
 	wire [(DBITS-1):0] pcplus_F=PC+INSTSIZE;
 	// This is the predicted value of the PC
 	// that we used to fetch the next instruction
 	//wire [(DBITS+1):0] predval=bpred[PC[(DBITS-1):0]];
-	wire [(DBITS-1):0] prediction=bpred[(PC[7:0])];
+	wire [(DBITS-1):0] prediction=bpred[PC_X];
 	//wire [1:0] predodds=predval[(DBITS+1):(DBITS)];
-	wire [(DBITS-1):0] pcpred_F=(prediction!=32'd0)?prediction:pcplus_F;
+	wire [(DBITS-1):0] pcpred_F=((prediction!=32'd0)&&(inst_F[31:29]==ADDROP))?prediction:pcplus_F;
 	//wire [(DBITS-1):0] pcpred_F=pcplus_F;
 	
 	// Instruction-fetch
@@ -195,7 +198,7 @@ module Project(
 		inst_D<=(!stall)?inst_F:inst_D;
 		pcpred_D<=(!stall)?pcpred_F:pcpred_D;
 		pcplus_D<=(!stall)?pcplus_F:pcplus_D;
-		flush_F<=mispred_B||isjump_M;
+		flush_F<=mispred_B&!isnop_M;
 	end
 	
 	// Register-read
@@ -296,6 +299,7 @@ module Project(
 		isjump_M<=(!flush_A)?isjump_A:0;
 	end
 	
+	wire [5:0] PC_Y=PC_W[7:2];
 	//wire [1:0] newpredodds=mispred_B?predodds_A+2'd1:predodds_A;
 	integer i;
 	always @(posedge clk or posedge reset) begin
@@ -303,12 +307,13 @@ module Project(
 			for(i=0;i<8;i=i+1)
 				bpred[i]<=32'd0;
 		end else
-			if(mispred_B_W || prediction_W&&!isnop_W)
-				bpred[(PC_W[7:0])] <= pcgood_W;
+			//if(mispred_B_W || prediction_W&&!isnop_W)
+			if(prediction_W&&!isnop_W)
+				bpred[PC_Y] <= pcgood_W;
 	end
 	reg flush_F;
-	wire flush_D=(mispred_B|isjump_M)|flush_F;
-	wire flush_A=(mispred_B|isjump_M);
+	wire flush_D=((mispred_B)&!isnop_M) | flush_F;
+	wire flush_A=(mispred_B)&!isnop_M;
 	
 	reg [(DBITS-1):0] memaddr_M;
 	wire [(DBITS-1):0] wmemval_M=wrmem_M?regval2_M:{(DBITS){1'bX}};
@@ -404,9 +409,9 @@ module Project(
 	reg selmemout_A;
 	reg selmemout_M;
 	reg selmemout_W;
-	reg isnop_A = 1'b1;
-	reg isnop_M = 1'b1;
-	reg isnop_W = 1'b1;
+	reg isnop_A;
+	reg isnop_M;
+	reg isnop_W;
 	reg [(DBITS-1):0] pcplus_A;
 	reg [(DBITS-1):0] pcplus_W;
 	reg signed [(DBITS-1):0] workingimm_A;
@@ -431,14 +436,13 @@ module Project(
 	reg [(OP1BITS-1):0] opcode_A;
 	reg [(OP1BITS-1):0] opcode_M;
 	//reg [1:0] predodds_A;
-	reg prediction_A;
-	reg prediction_M;
 	reg prediction_W;
+	reg prediction_M;
 	
 	always @(posedge clk) begin
-		prediction_A<=(prediction==0)&&!isnop_D;
-		prediction_M<=prediction_A&&!isnop_A&&!flush_A;
-		prediction_W<=prediction_M&&isnop_M;
+		//prediction_A<=(isjump_D | isbranch_D)&&!isnop_D;
+		prediction_M<=(isjump_A | isbranch_A)&&!isnop_A;
+		prediction_W<=prediction_M&&!isnop_M;
 	
 		//predodds_A<=predodds;
 		//initial regval1_A and regval2_A assignments handle RAW data hazard
@@ -502,7 +506,7 @@ module Project(
 		PC_W<=PC_M;
 		pcpred_A<=pcpred_D;
 		pcpred_M<=pcpred_A;
-		pcgood_W<=pcgood_B;
+		pcgood_W<=pcgood_M;
 		mispred_B_W<=mispred_B;
 		aluout_M<=aluout_A;
 	end
