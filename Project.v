@@ -156,11 +156,8 @@ module Project(
 	wire [(DBITS-1):0] pcplus_F=PC+INSTSIZE;
 	// This is the predicted value of the PC
 	// that we used to fetch the next instruction
-	//wire [(DBITS+1):0] predval=bpred[PC[(DBITS-1):0]];
 	wire [(DBITS-1):0] prediction=bpred[PC_X];
-	//wire [1:0] predodds=predval[(DBITS+1):(DBITS)];
 	wire [(DBITS-1):0] pcpred_F=((prediction!=32'd0)&&(inst_F[31:29]==ADDROP))?prediction:pcplus_F;
-	//wire [(DBITS-1):0] pcpred_F=pcplus_F;
 	
 	// Instruction-fetch
 	(* ram_init_file = IMEMINITFILE *)
@@ -240,17 +237,10 @@ module Project(
 	wire signed [(DBITS-1):0] aluin2_A=aluimm_A?workingimm_A:regval2_A;
 	wire signed [(DBITS-1):0] alu_log;
 	wire signed [(DBITS-1):0] alu_eq;
-	wire signed [(DBITS-1):0] alu_br;
 	wire signed [(DBITS-1):0] alu_mth;
 	wire signed [(DBITS-1):0] aluout_A;
 	
-	assign alu_br=	(!isbranch_A)?{32'b0}:
-					(alufunc_A==OP1_BEQ)?{31'b0,aluin1_A==aluin2_A}:
-					(alufunc_A==OP1_BNE)?{31'b0,aluin1_A!=aluin2_A}:
-					(alufunc_A==OP1_BLT)?{31'b0,aluin1_A<aluin2_A}:
-					{31'b0,aluin1_A<=aluin2_A}; //else BLE
-	assign alu_eq=	(isbranch_A)?{32'b0}:
-					(alufunc_A==OP2_EQ)?{31'b0,aluin1_A==aluin2_A}:
+	assign alu_eq=	(alufunc_A==OP2_EQ)?{31'b0,aluin1_A==aluin2_A}:
 					(alufunc_A==OP2_NE)?{31'b0,aluin1_A!=aluin2_A}:
 					(alufunc_A==OP2_LT)?{31'b0,aluin1_A<aluin2_A}:
 					(alufunc_A==OP2_LE)?{31'b0,aluin1_A<=aluin2_A}:
@@ -268,7 +258,7 @@ module Project(
 					(alufunc_A==OP2_SUB)?{aluin1_A-aluin2_A}:
 					{32'b0};
 	
-	assign aluout_A = {alu_br|alu_eq|alu_log|alu_mth};
+	assign aluout_A = {alu_eq|alu_log|alu_mth};
 	
 	//do we actually need stall with branch prediction?
 	wire dobranch_A=(isbranch_A&&(aluout_A==1));
@@ -384,10 +374,7 @@ module Project(
 	//update regs for Exec/ALU stage
 	reg [(DBITS-1):0] regval1_A;
 	reg [(DBITS-1):0] regval2_A;
-	reg [(DBITS-1):0] regval1_M;
 	reg [(DBITS-1):0] regval2_M;
-	reg [(DBITS-1):0] regval1_W;
-	reg [(DBITS-1):0] regval2_W;
 	reg [(REGNOBITS-1):0] wregno_A;
 	reg [(REGNOBITS-1):0] wregno_M;
 	reg [(REGNOBITS-1):0] wregno_W;
@@ -402,28 +389,20 @@ module Project(
 	reg aluimm_A;
 	reg selaluout_A;
 	reg selaluout_M;
-	reg selaluout_W;
 	reg selpcplus_A;
 	reg selpcplus_M;
-	reg selpcplus_W;
 	reg selmemout_A;
 	reg selmemout_M;
-	reg selmemout_W;
 	reg isnop_A;
 	reg isnop_M;
 	reg isnop_W;
 	reg [(DBITS-1):0] pcplus_A;
-	reg [(DBITS-1):0] pcplus_W;
 	reg signed [(DBITS-1):0] workingimm_A;
 	reg [(REGNOBITS-1):0] dreg_A={REGNOBITS{1'b0}};
 	reg [(REGNOBITS-1):0] dreg_M={REGNOBITS{1'b0}};
 	reg [(REGNOBITS-1):0] dreg_W={REGNOBITS{1'b0}};
 	reg [(REGNOBITS-1):0] sreg1_A;
 	reg [(REGNOBITS-1):0] sreg2_A;
-	reg [(REGNOBITS-1):0] sreg1_M;
-	reg [(REGNOBITS-1):0] sreg2_M;
-	reg [(REGNOBITS-1):0] sreg1_W;
-	reg [(REGNOBITS-1):0] sreg2_W;
 	reg [(DBITS-1):0] wregval_W;
 	wire [(REGNOBITS-1):0] dreg_D=(aluimm_D|isjump_D)?rt_D:rd_D;
 	reg [(DBITS-1):0] PC_D;
@@ -432,27 +411,22 @@ module Project(
 	reg [(DBITS-1):0] PC_W;
 	reg [(DBITS-1):0] pcgood_W;
 	reg [(DBITS-1):0] pcpred_M;
-	reg mispred_B_W;
 	reg [(OP1BITS-1):0] opcode_A;
 	reg [(OP1BITS-1):0] opcode_M;
-	//reg [1:0] predodds_A;
 	reg prediction_W;
 	reg prediction_M;
 	
 	always @(posedge clk) begin
-		//prediction_A<=(isjump_D | isbranch_D)&&!isnop_D;
 		prediction_M<=(isjump_A | isbranch_A)&&!isnop_A;
 		prediction_W<=prediction_M&&!isnop_M;
 	
-		//predodds_A<=predodds;
 		//initial regval1_A and regval2_A assignments handle RAW data hazard
 		regval1_A<=	(flush_D)?0:
 						(sreg1_mux==2'b0)?regs[rregno1_D]:
 						(sreg1_mux==2'b01)?aluout_A:
 						(sreg1_mux==2'b10)?wregval_M:
 						wregval_W; //assume sreg1_mux==11
-		regval1_M<=regval1_A;
-		regval1_W<=regval1_M;
+		
 		regval2_A<=	(flush_D)?0:
 						(sreg2_mux==2'b0)?regs[rregno2_D]:
 						(sreg2_mux==2'b01)?aluout_A:
@@ -460,7 +434,6 @@ module Project(
 						wregval_W; //assume sreg2_mux==11
 		
 		regval2_M<=regval2_A;
-		regval2_W<=regval2_M;
 		wregno_A<=(stall)?0:wregno_D;
 		wregno_M<=(!flush_A)?wregno_A:0;
 		wregno_W<=wregno_M;
@@ -474,30 +447,22 @@ module Project(
 		isjump_A<=(stall)?0:isjump_D;
 		selaluout_A<=(stall)?0:selaluout_D;
 		selaluout_M<=(!flush_A)?selaluout_A:0;
-		selaluout_W<=selaluout_M;
 		selmemout_A<=(stall)?0:selmemout_D;
 		selmemout_M<=(!flush_A)?selmemout_A:0;
-		selmemout_W<=selmemout_M;
 		selpcplus_A<=(stall)?0:selpcplus_D;
 		selpcplus_M<=(!flush_A)?selpcplus_A:0;
-		selpcplus_W<=selpcplus_M;
 		isnop_A<=(stall)?1'b1:isnop_D;
 		isnop_M<=(!flush_A)?isnop_A:1'b1;
 		isnop_W<=isnop_M;
 		pcplus_A<=pcplus_D;
 		pcplus_M<=pcplus_A;
-		pcplus_W<=pcplus_M;
 		workingimm_A<=workingimm_D;
 		alufunc_A<=(stall)?0:alufunc_D;
 		dreg_A<=(stall)?0:dreg_D;
 		dreg_M<=(!flush_A)?dreg_A:0;
 		dreg_W<=dreg_M;
 		sreg1_A<=(stall)?0:rs_D;
-		sreg1_M<=(!flush_A)?sreg1_A:0;
-		sreg1_W<=sreg1_M;
 		sreg2_A<=(stall)?0:rt_D;
-		sreg2_M<=(!flush_A)?sreg2_A:0;
-		sreg2_W<=sreg2_M;
 		aluimm_A<=(stall)?0:aluimm_D;
 		wregval_W<=wregval_M;
 		PC_D<=PC;
@@ -507,7 +472,6 @@ module Project(
 		pcpred_A<=pcpred_D;
 		pcpred_M<=pcpred_A;
 		pcgood_W<=pcgood_M;
-		mispred_B_W<=mispred_B;
 		aluout_M<=aluout_A;
 	end
 	wire mnop = (isnop_M |wrmem_M);
