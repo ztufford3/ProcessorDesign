@@ -1,8 +1,8 @@
 module Project(
 	input        CLOCK_50,
 	input        RESET_N,
-	input  [3:0] KEY,
-	input  [9:0] SW,
+	input	 [9:0] SW,
+	input	 [3:0] KEY,
 	output [6:0] HEX0,
 	output [6:0] HEX1,
 	output [6:0] HEX2,
@@ -28,7 +28,7 @@ module Project(
   parameter ADDRTCNT	=32'hFFFFF100;
   parameter ADDRTLIM	=32'hFFFFF104;
   parameter ADDRTCTL	=32'hFFFFF108;
-  parameter IMEMINITFILE="clock.mif";
+  parameter IMEMINITFILE="Test2.mif";
   parameter IMEMADDRBITS=16;
   parameter IMEMWORDBITS=2;
   parameter IMEMWORDS=(1<<(IMEMADDRBITS-IMEMWORDBITS));
@@ -66,8 +66,16 @@ module Project(
   parameter OP2_NXOR =OP2_XOR|6'b001000;
   
   //clock frequency
-  parameter FREQ = 32'd70;
-  parameter MILLISEC = FREQ*24'd1000;
+  parameter FREQ = 10'd113;
+  parameter MILLISEC = FREQ*24'd10000;
+  
+  
+	
+	parameter BITS = 32;
+	parameter KCTLADDR = 32'hFFFFF084;
+	parameter SCTLADDR = 32'hFFFFF094;
+	
+	
   
 	reg [3:0] oldkey=4'b1111;
 	wire key0press={oldkey[0],KEY[0]}==2'b00;
@@ -75,24 +83,24 @@ module Project(
 	wire key2press={oldkey[2],KEY[2]}==2'b00;
 	wire key3press={oldkey[3],KEY[3]}==2'b00;
 	
-	reg [3:0] KCTRL = 4'd0;
+	reg [3:0] KCTL = 4'd0;
 	reg [3:0] KDATA = 4'd0;
 	
 	//high if KDATA change is detected
 	wire key_ready=(KEY!=KDATA);
 	//set high if ready is still 1 when KDATA changes
-	wire key_overrun=key_ready&&(KCTRL[0]);
+	wire key_overrun=key_ready&&(KCTL[0]);
 	//control bit. 0 for now
 	wire key_ie=0;
 	
 	 always @(posedge clk) begin
 		oldkey<=KEY;
 		//...bit 4 is ie? Does he mean bit 3? Is a bit just always 0? Should this just be 3 bits?
-		KCTRL<={key_ie,1'b0,key_overrun,key_ready};
+		KCTL<={key_ie,1'b0,key_overrun,key_ready};
 		KDATA<={key3press,key2press,key1press,key0press};
 		//read from KDATA sets ready bit to 0
 		if(memaddr_M==ADDRKEY && selmemout_M)
-			KCTRL[0]<=1'b0;
+			KCTL[0]<=1'b0;
 	  end
   
   // The reset signal comes from the reset button on the DE0-CV board
@@ -100,19 +108,19 @@ module Project(
   wire clk,locked;
   // The PLL is wired to produce clk and locked signals for our logic
   Pll myPll(
-    .refclk(CLOCK_50),
+    .refclk (CLOCK_50),
 	 .rst      (!RESET_N),
 	 .outclk_0 (clk),
     .locked   (locked)
   );
   wire reset=!locked;
-  reg [(DBITS-1):0] bpred [64:0];
+  reg [(DBITS-1):0] bpred [63:0];
   //assign clk=!KEY[0];
   
   //made switch debouncer arbitrarily large
   reg [23:0] switch_debouncer;
   reg [9:0] SDATA;
-  reg [3:0] SCTRL;
+  reg [3:0] SCTL;
   //1 when a switch value changes
   wire switch_ready=(SDATA!=SW);
   //if the switch value has changed, but ready is still high
@@ -132,7 +140,7 @@ module Project(
 			//clear the ready bit
 			if(switch_debouncer>=(MILLISEC*24'd10)) begin
 				//wondering what's going on with bits #2 and #3 here as well
-				SCTRL<={switch_control, 1'b0, switch_overrun, switch_ready};
+				SCTL<={switch_control, 1'b0, switch_overrun, switch_ready};
 				SDATA<={SW};
 				switch_debouncer<=24'd0;
 			end else if(memaddr_M==ADDRSW && selmemout_M)
@@ -156,8 +164,11 @@ module Project(
 	wire [(DBITS-1):0] pcplus_F=PC+INSTSIZE;
 	// This is the predicted value of the PC
 	// that we used to fetch the next instruction
+	//wire [(DBITS+1):0] predval=bpred[PC[(DBITS-1):0]];
 	wire [(DBITS-1):0] prediction=bpred[PC_X];
+	//wire [1:0] predodds=predval[(DBITS+1):(DBITS)];
 	wire [(DBITS-1):0] pcpred_F=((prediction!=32'd0)&&(inst_F[31:29]==ADDROP))?prediction:pcplus_F;
+	//wire [(DBITS-1):0] pcpred_F=pcplus_F;
 	
 	// Instruction-fetch
 	(* ram_init_file = IMEMINITFILE *)
@@ -195,97 +206,119 @@ module Project(
 		inst_D<=(!stall)?inst_F:inst_D;
 		pcpred_D<=(!stall)?pcpred_F:pcpred_D;
 		pcplus_D<=(!stall)?pcplus_F:pcplus_D;
-		flush_F<=mispred_B&!isnop_M;
+		flush_F<=mispred_B;
 	end
 	
 	// Register-read
 	reg [(DBITS-1):0] regs[(REGWORDS-1):0];
-	// Two read ports, always using rs and rt for register numbers
 	wire [(REGNOBITS-1):0] rregno1_D=rs_D, rregno2_D=rt_D;
 	
-		// Now the real data memory
-	wire MemEnable=!(memaddr_M[(DBITS-1):DMEMADDRBITS]);
-	wire MemWE=(!reset)&wrmem_M&MemEnable;
-	(* ram_init_file = IMEMINITFILE, ramstyle="no_rw_check" *)
-	reg [(DBITS-1):0] dmem[(DMEMWORDS-1):0];
+	wire selDataH = (abus == ADDRHEX);
+	wire wrDataH = selDataH & wrmem_M;
+	wire rdDataH = selDataH & (selmemout_M);
 	
-	wire [(DBITS-1):0] wmemval_M=wrmem_M?regval2_M:{(DBITS){1'bX}};
+	wire selDataL = (abus == ADDRLEDR);
+	wire wrDataL = selDataL && wrmem_M;
+	wire rdDataL = selDataL && (selmemout_M);
 	
-	//wire selCnt = ;
-	//wire selLim = ;
-	//wire selCtl = ;
-	wire wrCnt = (memaddr_M == ADDRTCNT) && wrmem_M;
-	//wire rdCnt = selCnt && (!wrmem_M);
-	wire wrLim = (memaddr_M == ADDRTLIM) && wrmem_M;
-	//wire rdLim = selLim && (!wrmem_M);
-	wire wrCtl = (memaddr_M == ADDRTCTL) && wrmem_M;
-	//wire rdCtl = selCtl && (!wrmem_M);
+	wire selDataS = (abus == ADDRSW);
+	wire selCtlS = (abus == SCTLADDR);
+	wire wrDataS = selDataS && wrmem_M;
+	wire rdDataS = selDataS && (selmemout_M);
+	wire wrCtlS = selCtlS && wrmem_M && !(wmemval_M[0] | wmemval_M[1]);
+	wire wrCtlChkS = selCtlS && wrmem_M && (wmemval_M[0] | wmemval_M[1]);
+	wire rdCtlS = selCtlS && (selmemout_M);
+	
+	wire selDataK = (abus == ADDRKEY);
+	wire selCtlK = (abus == KCTLADDR);
+	wire wrDataK = selDataK && wrmem_M;
+	wire rdDataK = selDataK && (selmemout_M);
+	wire wrCtlK = selCtlK && wrmem_M && !(wmemval_M[0] | wmemval_M[1]);
+	wire wrCtlChkK = selCtlK && wrmem_M && (wmemval_M[0] | wmemval_M[1]);
+	wire rdCtlK = selCtlK && (selmemout_M);
+	
+	wire selCntT = (abus == ADDRTCNT);
+	wire wrCntT = selCntT && wrmem_M;
+	wire rdCntT = selCntT & selmemout_M;
+	wire selCtlT = (abus == ADDRTCTL);
+	wire rdCtlT = selCtlT & selmemout_M;
+	wire wrCtlT = selCtlT && wrmem_M;
+	wire selLimT = (abus == ADDRTLIM);
+	wire wrLimT = selLimT && wrmem_M;
+	wire rdLimT = selLimT && selmemout_M;
 	
 	//Timer limit register
 	reg [31:0] TCNT=32'b0;
 	//Timer control register
-	reg [4:0] TCTL=4'b0;
+	reg [31:0] TCTL=32'b0;
 	//Timer count register
 	reg [31:0] TLIM=32'b0;
 	reg [31:0] count=32'b0;
 	//will change the size of TCTL as needed
 	//count of clock cycles to track 1 millisecond
-	wire checkMilsec = ((count%(MILLISEC-1))==0);
-	wire limEn = (TLIM!=0);
-	wire limHit = TCNT==(TLIM-1);
+	wire checkMilsec = (count==(MILLISEC-1));
+	wire limHit = TCNT==(TLIM-1) & (TLIM!=0);
 	
 	//basically, if it hasn't been a millisecond, feed back in same values. If TCNT is within
 	//the TLIM-1 range, increment it. If TLIM is nonzero and TCNT is out of bounds, the read
 	//bit is set and TCNT goes back to 0. If the read bit was already set, the overflow bit
 	//gets set.
 	always @(posedge clk) begin
-		count<=count+32'd1;
-		TCTL<=(wrCtl)?TCTL&wmemval_M[3:0]:
-					(limHit&limEn&TCTL[0])?4'b0011:
-					(limHit&limEn)?4'b0001:
+		count<=limHit?32'b0:count+32'd1;
+		TCTL<=(wrCtlT)?TCTL&dbus:
+					(limHit&TCTL[0])?32'b0011:
+					(limHit)?32'b0001:
 					TCTL;
 		//TCTL[0]<=(wrCtl)?1'b0:
 					
 					//TCTL[0];
 		
-		TCNT<=	(wrCnt)?wmemval_M:
-					(limHit&&limEn)?32'b0:
+		TCNT<=	(wrCntT)?wmemval_M:
+					(limHit)?32'b0:
 					checkMilsec?(TCNT+32'd1):
 					TCNT;
-		TLIM<=(wrLim)?wmemval_M:TLIM;
+		TLIM<=(wrLimT)?wmemval_M:TLIM;
 		//TCTL<=(wrCtl)?DBUSI:TCTL;
 	end
+		// Now the real data memory
+	wire fromdmem = (memaddr_M<ADDRHEX) & !wrmem_M;
+	wire todmem = wrmem_M & (!(selDataS | selDataK));
+	wire [(DBITS-1):0] dbus;
 	
-	//wire [31:0] DBUS_CNT = (rdCnt)?TCNT:32'd0;
-	//wire [31:0] DBUS_LIM = (rdLim)?TLIM:32'd0;
-	//wire [31:0] DBUS_CTL = (rdCtl)?{28'b0,TCTL}:32'd0;
-	
-	//wire [31:0] tout_M=(DBUS_CNT | DBUS_LIM | DBUS_CTL);
-	/*Timer timer(	.ABUS(memaddr_M),
-						.DBUSI(wmemval_M),
-						.WE(wrmem_M),
-						.CLK(clk),
-						.DBUSO(tout_M) ); */
-						
+	assign dbus = todmem?wmemval_M:{(DBITS){1'bz}};
+	assign dbus = fromdmem?MemVal:{(DBITS){1'bz}};
+	assign dbus = rdDataK?{12'b0,KDATA}:{(DBITS){1'bz}};
+	assign dbus = rdDataS? {6'b0,SDATA}:{(DBITS){1'bz}};
+	assign dbus = rdCtlK?{{28{1'b0}},KCTL}:{(DBITS){1'bz}};
+	assign dbus = rdCtlS?{{28{1'b0}},SCTL}:{(DBITS){1'bz}};
+	assign dbus = rdDataH?{{8{1'b0}},HDATA[23:0]}:{(DBITS){1'bz}};
+	assign dbus = rdDataL?{{22{1'b0}},LDATA[9:0]}:{(DBITS){1'bz}};
+	assign dbus = wrDataK?{{28{1'b0}},KEY[3:0]}:{(DBITS){1'bz}};
+	assign dbus = wrDataS?{{22{1'b0}},SW[9:0]}:{(DBITS){1'bz}};
+	assign dbus = rdCntT?TCNT:{(DBITS){1'bz}};
+	assign dbus = rdCtlT?TCTL:{(DBITS){1'bz}};
+	assign dbus = rdLimT?TLIM:{(DBITS){1'bz}};
+	/*
+	assign dbus = todmem?wmemval_M:fromdmem?MemVal:rdDataK?{12'b0,KDATA}:
+				rdDataS? {6'b0,SDATA}:rdCtlK?{{28{1'b0}},KCTL}:rdCtlS?{{28{1'b0}},SCTL}:
+				rdDataH?{{8{1'b0}},HDATA[23:0]}:rdDataL?{{22{1'b0}},LDATA[9:0]}:
+				wrDataK?{{28{1'b0}},KEY[3:0]}:wrDataS?{{22{1'b0}},SW[9:0]}:{(DBITS){1'bz}};
+	*/
+	wire [(DBITS-1):0] abus = memaddr_M;
+	wire MemEnable=!(memaddr_M[(DBITS-1):DMEMADDRBITS]);
+	wire MemWE=wrmem_M&MemEnable;
+	(* ram_init_file = IMEMINITFILE, ramstyle="no_rw_check" *)
+	reg [(DBITS-1):0] dmem[(DMEMWORDS-3):0];
 	always @(posedge clk)
 		if(MemWE)
 			dmem[memaddr_M[(DMEMADDRBITS-1):DMEMWORDBITS]]<=wmemval_M;
 	wire [(DBITS-1):0] MemVal=MemWE?{DBITS{1'bX}}:dmem[memaddr_M[(DMEMADDRBITS-1):DMEMWORDBITS]];
 	// Connect memory and input devices to the bus
-	wire [(DBITS-1):0] memout_M=
-		MemEnable?MemVal:
-		(memaddr_M==ADDRKEY)?{12'b0,KDATA}:
-		(memaddr_M==ADDRSW)? {6'b0,SDATA}:
-		(memaddr_M==ADDRHEX)?{8'b0,HexOut}:
-		(memaddr_M==ADDRLEDR)?{22'b0,LedrOut}:
-		(memaddr_M==ADDRTCNT)?TCNT:
-		(memaddr_M==ADDRTLIM)?TLIM:
-		(memaddr_M==ADDRTCTL)?{28'b0,TCTL}:
-		32'hDEADDEAD;
+	//wire [(DBITS-1):0] memout_M=MemEnable?MemVal:32'hDEADDEAD;
 	
 	// If LW is executed with the address targeting Hex or LEDR, it will grab the current output
 	wire [(DBITS-1):0] wregval_M=(selaluout_M&&!selmemout_M)?aluout_M:
-											selmemout_M?memout_M:
+											selmemout_M?dbus:
 											selpcplus_M?pcplus_M:
 											{(DBITS){1'bX}};
 	
@@ -299,10 +332,17 @@ module Project(
 	wire signed [(DBITS-1):0] aluin2_A=aluimm_A?workingimm_A:regval2_A;
 	wire signed [(DBITS-1):0] alu_log;
 	wire signed [(DBITS-1):0] alu_eq;
+	wire signed [(DBITS-1):0] alu_br;
 	wire signed [(DBITS-1):0] alu_mth;
 	wire signed [(DBITS-1):0] aluout_A;
 	
-	assign alu_eq=	(alufunc_A==OP2_EQ)?{31'b0,aluin1_A==aluin2_A}:
+	assign alu_br=	(!isbranch_A)?{32'b0}:
+					(alufunc_A==OP1_BEQ)?{31'b0,aluin1_A==aluin2_A}:
+					(alufunc_A==OP1_BNE)?{31'b0,aluin1_A!=aluin2_A}:
+					(alufunc_A==OP1_BLT)?{31'b0,aluin1_A<aluin2_A}:
+					{31'b0,aluin1_A<=aluin2_A}; //else BLE
+	assign alu_eq=	(isbranch_A)?{32'b0}:
+					(alufunc_A==OP2_EQ)?{31'b0,aluin1_A==aluin2_A}:
 					(alufunc_A==OP2_NE)?{31'b0,aluin1_A!=aluin2_A}:
 					(alufunc_A==OP2_LT)?{31'b0,aluin1_A<aluin2_A}:
 					(alufunc_A==OP2_LE)?{31'b0,aluin1_A<=aluin2_A}:
@@ -320,8 +360,9 @@ module Project(
 					(alufunc_A==OP2_SUB)?{aluin1_A-aluin2_A}:
 					{32'b0};
 	
-	assign aluout_A = {alu_eq|alu_log|alu_mth};
+	assign aluout_A = {alu_br|alu_eq|alu_log|alu_mth};
 	
+	//do we actually need stall with branch prediction?
 	wire dobranch_A=(isbranch_A&&(aluout_A==1));
 	
 	wire [(DBITS-1):0] brtarg_A=pcplus_A+workingimm_A;
@@ -358,15 +399,15 @@ module Project(
 			for(i=0;i<8;i=i+1)
 				bpred[i]<=32'd0;
 		end else
-			//if(mispred_B_W || prediction_W&&!isnop_W)
 			if(prediction_W&&!isnop_W)
 				bpred[PC_Y] <= pcgood_W;
 	end
 	reg flush_F;
-	wire flush_D=((mispred_B)&!isnop_M) | flush_F;
-	wire flush_A=(mispred_B)&!isnop_M;
+	wire flush_D=((mispred_B)) | flush_F;
+	wire flush_A=(mispred_B);
 	
 	reg [(DBITS-1):0] memaddr_M;
+	wire [(DBITS-1):0] wmemval_M=wrmem_M?regval2_M:{(DBITS){1'bX}};
 	always @(posedge clk)
 		if(wrmem_A|selmemout_A)
 			memaddr_M<=aluout_A;
@@ -375,80 +416,40 @@ module Project(
 	
 	reg [(DBITS-1):0] aluout_M,pcplus_M;
 	
-	reg [23:0] HexOut;
-	reg [9:0] LedrOut;
-	SevenSeg ss5(.OUT(HEX5),.IN(HexOut[23:20]));
-	SevenSeg ss4(.OUT(HEX4),.IN(HexOut[19:16]));
-	SevenSeg ss3(.OUT(HEX3),.IN(HexOut[15:12]));
-	SevenSeg ss2(.OUT(HEX2),.IN(HexOut[11:8]));
-	SevenSeg ss1(.OUT(HEX1),.IN(HexOut[7:4]));
-	SevenSeg ss0(.OUT(HEX0),.IN(HexOut[3:0]));
+	reg [31:0] HDATA;
+	reg [31:0] LDATA;
+	SevenSeg ss5(.OUT(HEX5),.IN(HDATA[23:20]));
+	SevenSeg ss4(.OUT(HEX4),.IN(HDATA[19:16]));
+	SevenSeg ss3(.OUT(HEX3),.IN(HDATA[15:12]));
+	SevenSeg ss2(.OUT(HEX2),.IN(HDATA[11:8]));
+	SevenSeg ss1(.OUT(HEX1),.IN(HDATA[7:4]));
+	SevenSeg ss0(.OUT(HEX0),.IN(HDATA[3:0]));
 	
-	assign LEDR[9:0] = LedrOut;
+	assign LEDR[9:0] = LDATA[9:0];
+	//assign LEDR[9:0] = {wrDataH,wrDataL,wrDataK,rdDataH,rdDataL,rdDataK,todmem,fromdmem};
 	
 	always @(posedge clk or posedge reset) begin
-		if(reset)
-			HexOut<=24'hFEDEAD;
-		else begin
-			if(wrmem_M&&(memaddr_M==ADDRHEX))
-				HexOut[23:0] <= wmemval_M[23:0];
-			//if(wrmem_M&&(memaddr_M==ADDRLEDR))
-				/*if(wrmem_M&&(memaddr_M==ADDRTCNT)) begin
-					HexOut[23:12]<=TCNT[11:0];
-					HexOut[11:0]<=wmemval_M[11:0];
-					LedrOut[9]<=1'b1;
-					LedrOut[7]<=1'b0;
-					LedrOut[5]<=1'b0;
-					LedrOut[0]<=1'b0;
-				end else if(wrmem_M&&(memaddr_M==ADDRTLIM)) begin
-					HexOut[23:12]<=TLIM[11:0];
-					HexOut[11:0]<=wmemval_M[11:0];
-					LedrOut[7]<=1'b1;
-					LedrOut[9]<=1'b0;
-					LedrOut[5]<=1'b0;
-					LedrOut[0]<=1'b0;
-				end else if(wrmem_M&&(memaddr_M==ADDRTCTL)) begin
-					HexOut[23:12]<={8'b0,TCTL[3:0]};
-					HexOut[11:0]<=wmemval_M[11:0];
-					LedrOut[5]<=1'b1;
-					LedrOut[9]<=1'b0;
-					LedrOut[7]<=1'b0;
-					LedrOut[0]<=1'b0;
-				end else if(rdCnt) begin
-					HexOut[23:12]<=TCNT[11:0];
-					HexOut[11:0]<=memout_M[11:0];
-					LedrOut[9:7]<=3'b111;
-					LedrOut[6:0]<=7'b0;
-				end else if(rdLim) begin
-					HexOut[23:12]<=TLIM[11:0];
-					HexOut[11:0]<=memout_M[11:0];
-					LedrOut[6:4]<=3'b111;
-					LedrOut[9:7]<=3'b0;
-					LedrOut[3:0]<=4'b0;
-				end else if(rdCtl) begin
-					HexOut[23:12]<={8'b0,TCTL[3:0]};
-					HexOut[11:0]<=memout_M[11:0];
-					LedrOut[3:1]<=3'b111;
-					LedrOut[9:4]<=6'b0;
-					LedrOut[0]<=1'b0;
-				end else begin
-					//HexOut[23:12]<={8'b0,TCTL};
-					//HexOut[11:0]<=TCNT[11:0];
-					HexOut[23:0]<=PC_M[23:0];
-					LedrOut<=10'd1;
-				end
-				
-					LedrOut[8]<=wrCnt;
-					LedrOut[6]<=wrLim;
-					LedrOut[4]<=wrCtl;
-												//memaddr_M==ADDRTLIM||
-												//memaddr_M==ADDRTCTL))
-				  //LedrOut<=10'd1;
-				//LedrOut <= wmemval_M[9:0];
-				//if(wrmem_M)
-					//HexOut[23:0]<=memaddr_M[23:0];*/
-		end
+		if (reset) begin
+			HDATA<=24'hFEDEAD;
+		end else
+		HDATA<=wrDataH?dbus:HDATA;
 	end
+	
+	always @(posedge clk or posedge reset) begin
+		if (reset)
+			LDATA<=0;
+		else
+		LDATA<=wrDataL?dbus:LDATA;
+	end
+	
+	//always @(posedge clk or posedge reset) begin
+		//if(reset)
+			//HexOut<=24'hFEDEAD;
+		//else begin
+			//HexOut[23:0] <= dbus[23:0];
+			//LedrOut <= dbus[9:0];
+		//end
+	//end
 
 	// Decoding logic
 	always @* begin
@@ -487,6 +488,7 @@ module Project(
 	//update regs for Exec/ALU stage
 	reg [(DBITS-1):0] regval1_A;
 	reg [(DBITS-1):0] regval2_A;
+	reg [(DBITS-1):0] regval1_M;
 	reg [(DBITS-1):0] regval2_M;
 	reg [(REGNOBITS-1):0] wregno_A;
 	reg [(REGNOBITS-1):0] wregno_M;
@@ -516,6 +518,8 @@ module Project(
 	reg [(REGNOBITS-1):0] dreg_W={REGNOBITS{1'b0}};
 	reg [(REGNOBITS-1):0] sreg1_A;
 	reg [(REGNOBITS-1):0] sreg2_A;
+	reg [(REGNOBITS-1):0] sreg1_M;
+	reg [(REGNOBITS-1):0] sreg2_M;
 	reg [(DBITS-1):0] wregval_W;
 	wire [(REGNOBITS-1):0] dreg_D=(aluimm_D|isjump_D)?rt_D:rd_D;
 	reg [(DBITS-1):0] PC_D;
@@ -526,20 +530,23 @@ module Project(
 	reg [(DBITS-1):0] pcpred_M;
 	reg [(OP1BITS-1):0] opcode_A;
 	reg [(OP1BITS-1):0] opcode_M;
+	//reg [1:0] predodds_A;
 	reg prediction_W;
 	reg prediction_M;
 	
 	always @(posedge clk) begin
-		prediction_M<=(isjump_A || isbranch_A)&&!isnop_A;
+		//prediction_A<=(isjump_D | isbranch_D)&&!isnop_D;
+		prediction_M<=(isjump_A | isbranch_A)&&!isnop_A;
 		prediction_W<=prediction_M&&!isnop_M;
 	
+		//predodds_A<=predodds;
 		//initial regval1_A and regval2_A assignments handle RAW data hazard
 		regval1_A<=	(flush_D)?0:
 						(sreg1_mux==2'b0)?regs[rregno1_D]:
 						(sreg1_mux==2'b01)?aluout_A:
 						(sreg1_mux==2'b10)?wregval_M:
 						wregval_W; //assume sreg1_mux==11
-		
+		regval1_M<=regval1_A;
 		regval2_A<=	(flush_D)?0:
 						(sreg2_mux==2'b0)?regs[rregno2_D]:
 						(sreg2_mux==2'b01)?aluout_A:
@@ -547,36 +554,38 @@ module Project(
 						wregval_W; //assume sreg2_mux==11
 		
 		regval2_M<=regval2_A;
-		wregno_A<=(!stall)?wregno_D:0;
+		wregno_A<=(stall)?0:wregno_D;
 		wregno_M<=(!flush_A)?wregno_A:0;
 		wregno_W<=wregno_M;
-		wrreg_A<=(!stall)?wrreg_D:0;
+		wrreg_A<=(stall)?0:wrreg_D;
 		wrreg_M<=(!flush_A)?wrreg_A:0;
 		wrreg_W<=wrreg_M;
-		wrmem_A<=(!stall)?wrmem_D:0;
+		wrmem_A<=(stall)?0:wrmem_D;
 		wrmem_M<=(!flush_A)?wrmem_A:0;
 		wrmem_W<=wrmem_M;
-		isbranch_A<=(!stall)?isbranch_D:0;
-		isjump_A<=(!stall)?isjump_D:0;
-		selaluout_A<=(!stall)?selaluout_D:0;
+		isbranch_A<=(stall)?0:isbranch_D;
+		isjump_A<=(stall)?0:isjump_D;
+		selaluout_A<=(stall)?0:selaluout_D;
 		selaluout_M<=(!flush_A)?selaluout_A:0;
-		selmemout_A<=(!stall)?selmemout_D:0;
+		selmemout_A<=(stall)?0:selmemout_D;
 		selmemout_M<=(!flush_A)?selmemout_A:0;
-		selpcplus_A<=(!stall)?selpcplus_D:0;
+		selpcplus_A<=(stall)?0:selpcplus_D;
 		selpcplus_M<=(!flush_A)?selpcplus_A:0;
-		isnop_A<=(!stall)?isnop_D:1'b1;
+		isnop_A<=(stall)?1'b1:isnop_D;
 		isnop_M<=(!flush_A)?isnop_A:1'b1;
 		isnop_W<=isnop_M;
 		pcplus_A<=pcplus_D;
 		pcplus_M<=pcplus_A;
 		workingimm_A<=workingimm_D;
-		alufunc_A<=(!stall)?alufunc_D:0;
-		dreg_A<=(!stall)?dreg_D:0;
+		alufunc_A<=(stall)?0:alufunc_D;
+		dreg_A<=(stall)?0:dreg_D;
 		dreg_M<=(!flush_A)?dreg_A:0;
 		dreg_W<=dreg_M;
-		sreg1_A<=(!stall)?rs_D:0;
-		sreg2_A<=(!stall)?rt_D:0;
-		aluimm_A<=(!stall)?aluimm_D:0;
+		sreg1_A<=(stall)?0:rs_D;
+		sreg1_M<=(!flush_A)?sreg1_A:0;
+		sreg2_A<=(stall)?0:rt_D;
+		sreg2_M<=(!flush_A)?sreg2_A:0;
+		aluimm_A<=(stall)?0:aluimm_D;
 		wregval_W<=wregval_M;
 		PC_D<=PC;
 		PC_A<=PC_D;
@@ -600,8 +609,9 @@ module Project(
   wire W1;
   wire W2;
 	 assign sreg1_mux= {(M1 || W1),(A1 || W1)};
+	 //assign sreg1_mux[1]= (M1 || W1);
 	 assign sreg2_mux= {(M2 || W2),(A2 || W2)};
-	 
+	 //assign sreg2_mux[1]= (M2 || W2);
   Funit forward (
     .sreg1		(rregno1_D),
 	 .sreg2		(rregno2_D),
@@ -621,4 +631,17 @@ module Project(
 	 .drive_W_src2	(W2),
 	 .stall	(stall)
   );
+ 
+  wire intr=0;
+  /*
+  Timer timer (
+   .ABUS			(abus),
+	.DBUS			(dbus),
+	.WE			(MemWE),
+	.CLK			(clk),
+	.LOCK			(locked),
+	.INIT			(intr),
+	.INTR 		(intr)
+	);
+	*/
 endmodule
