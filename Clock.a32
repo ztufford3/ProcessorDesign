@@ -11,45 +11,86 @@
 
 	.ORIG 0x100
 	ADDI a0,Zero,1000
-	ADDI a1,Zero,59
-	ADDI a7,Zero,15104
-	ADDI a2,Zero,1507328
-	ADDI a3,Zero,1
-	ADDI a4,Zero,16711680
-	ADDI a5,Zero,65280
-	ADDI a6,Zero,255
+	ADDI s0,Zero,0; ONE DENOTES CLOCK DISP, ZERO DENOTES CLOCK SET
 	SW a0,TLIM(Zero)
-	SW Zero,TCTL(Zero)
+	ANDI t1,Zero,0
+	SW t1,HEX(Zero)
+	SW t1,TCTL(Zero)
 ClockLoop:
 	LW s1,TCTL(Zero)
-	BGT s1,Zero,IncSec
-	BR   ClockLoop
-IncSec:
+	BGT s1,Zero,IncSecLo
+	BR  ClockLoop
+IncSecLo:
 	LW s2,HEX(Zero)
-	AND s3,s2,a6
-	BEQ s3,a1,IncSec
+	ANDI s3,s2,15; grab the low sec digit
+	ADDI t0,Zero,9
+	BEQ s3,t0,IncSecHi; if it's 9, jump, otherwise, add a sec and update
 	ADDI s2,s2,1
 	ADDI s1,Zero,0
 	SW s2,HEX(Zero)
 	SW s1,TCTL(Zero)
 	BR ClockLoop
-IncMin:
-	AND s4,s2,a5
-	BEQ s4,a7,IncHour
-	ADDI s2,s2,197
+IncSecHi:
+	ANDI s3,s2,240; grab the higher sec digit
+	ADDI t0,Zero,80; check if sec hi is 5
+	BEQ s3,t0,IncMinLo; increment the minute if secs==59, otherwise add increment sec hi, zero sec lo, and update
+	ADDI s2,s2,16; +10 secs
+	SUBI s2,s2,9; secs has to be 9 here, so sub 9 to make it 0
 	ADDI s1,Zero,0
 	SW s2,HEX(Zero)
 	SW s1,TCTL(Zero)
 	BR ClockLoop
-IncHour:
-	AND s5,s2,a4
-	BEQ s5,a2,SetZero
-	ADDI s2,s2,50373
+IncMinLo:
+	ANDI s3,s2,3840; grab the lower min digit
+	ADDI t0,Zero,2304; check if min lo is 9
+	BEQ s3,t0,IncHourHi; if min lo is 9, need to inc min hi, else inc min lo and reset secs
+	ADDI s2,s2,256; +1 min
+	SUBI s2,s2,89; -59 secs
+	ADDI s1,Zero,0
+	SW s2,HEX(Zero)
+	SW s1,TCTL(Zero)
+	BR ClockLoop
+IncMinHi:
+	ANDI s3,s2,61440; grab higher min digit
+	ADDI t0,Zero,10240; check if min hi is 5 (20480)
+	ADDI t0,t0,10240; 
+	BEQ s3,t0,IncHourLo; if mins==59, inc hour, otherwise do +10mins and reset min lo and secs
+	ADDI s2,s2,4096; +10 mins
+	SUBI s2,s2,2393; -9 mins and 59 secs
+	ADDI s1,Zero,0
+	SW s2,HEX(Zero)
+	SW s1,TCTL(Zero)
+	BR ClockLoop
+IncHourLo:
+	ADDI t1,Zero,1020
+	ADDI t2,Zero,0
+	ADDI t3,Zero,0
+HLLoop:
+	ADDI t3,t3,16384; add this 1020 times
+	ADDI t2,t2,1
+	BNE t1,t2,HLLoop
+	AND s3,s2,t3; grab both hr digits (t3=16711680) 2^14 1020 times
+	
+	ADDI t0,Zero,2293760; check if hrs==23
+	BEQ s3,t0,SetZero; reset clock display if 23:59:59, else, check if hr lo is 9
+	ADDI t0,Zero,589824; hrlo==9
+	BEQ s3,t0,IncHrHi; increment the hi hour digit if lo is 9, otherwise add an hour and reset mins and secs
+	ADDI s2,s2,65536; +1hr lo
+	SUBI s2,s2,22873; -59 mins 59 secs
+	ADDI s1,Zero,0
+	SW s2,HEX(Zero)
+	SW s1,TCTL(Zero)
+	BR ClockLoop
+IncHourHi:
+	ANDI s3,s2,15728640; grab higher hr digit
+	ADDI s2,s2,1048576; +10 hrs
+	SUBI s2,s2,612697; -9 hrs 59 mins 59 secs
 	ADDI s1,Zero,0
 	SW s2,HEX(Zero)
 	SW s1,TCTL(Zero)
 	BR ClockLoop
 SetZero:
-	SW Zero,HEX(Zero)
-	SW Zero,TCTL(Zero)
+	ADDI s1,Zero,0
+	SW s1,HEX(Zero)
+	SW s1,TCTL(Zero)
 	BR ClockLoop

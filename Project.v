@@ -25,10 +25,10 @@ module Project(
   parameter ADDRKEYCTRL =32'hFFFFF084;
   parameter ADDRSW   =32'hFFFFF090;
   parameter ADDRSWCTRL	=32'hFFFFF094;
-  parameter ADDRTCNT	=32'hFFFF0100;
-  parameter ADDRTLIM	=32'hFFFF0104;
-  parameter ADDRTCTL	=32'hFFFF0108;
-  parameter IMEMINITFILE="Sorter3.mif";
+  parameter ADDRTCNT	=32'hFFFFF100;
+  parameter ADDRTLIM	=32'hFFFFF104;
+  parameter ADDRTCTL	=32'hFFFFF108;
+  parameter IMEMINITFILE="clock.mif";
   parameter IMEMADDRBITS=16;
   parameter IMEMWORDBITS=2;
   parameter IMEMWORDS=(1<<(IMEMADDRBITS-IMEMWORDBITS));
@@ -66,8 +66,8 @@ module Project(
   parameter OP2_NXOR =OP2_XOR|6'b001000;
   
   //clock frequency
-  parameter FREQ = 10'd50;
-  parameter MILLISEC = FREQ*24'd10000;
+  parameter FREQ = 32'd70;
+  parameter MILLISEC = FREQ*24'd1000;
   
 	reg [3:0] oldkey=4'b1111;
 	wire key0press={oldkey[0],KEY[0]}==2'b00;
@@ -208,6 +208,65 @@ module Project(
 	wire MemWE=(!reset)&wrmem_M&MemEnable;
 	(* ram_init_file = IMEMINITFILE, ramstyle="no_rw_check" *)
 	reg [(DBITS-1):0] dmem[(DMEMWORDS-1):0];
+	
+	wire [(DBITS-1):0] wmemval_M=wrmem_M?regval2_M:{(DBITS){1'bX}};
+	
+	//wire selCnt = ;
+	//wire selLim = ;
+	//wire selCtl = ;
+	wire wrCnt = (memaddr_M == ADDRTCNT) && wrmem_M;
+	//wire rdCnt = selCnt && (!wrmem_M);
+	wire wrLim = (memaddr_M == ADDRTLIM) && wrmem_M;
+	//wire rdLim = selLim && (!wrmem_M);
+	wire wrCtl = (memaddr_M == ADDRTCTL) && wrmem_M;
+	//wire rdCtl = selCtl && (!wrmem_M);
+	
+	//Timer limit register
+	reg [31:0] TCNT=32'b0;
+	//Timer control register
+	reg [4:0] TCTL=4'b0;
+	//Timer count register
+	reg [31:0] TLIM=32'b0;
+	reg [31:0] count=32'b0;
+	//will change the size of TCTL as needed
+	//count of clock cycles to track 1 millisecond
+	wire checkMilsec = ((count%(MILLISEC-1))==0);
+	wire limEn = (TLIM!=0);
+	wire limHit = TCNT==(TLIM-1);
+	
+	//basically, if it hasn't been a millisecond, feed back in same values. If TCNT is within
+	//the TLIM-1 range, increment it. If TLIM is nonzero and TCNT is out of bounds, the read
+	//bit is set and TCNT goes back to 0. If the read bit was already set, the overflow bit
+	//gets set.
+	always @(posedge clk) begin
+		count<=count+32'd1;
+		TCTL<=(wrCtl)?TCTL&wmemval_M[3:0]:
+					(limHit&limEn&TCTL[0])?4'b0011:
+					(limHit&limEn)?4'b0001:
+					TCTL;
+		//TCTL[0]<=(wrCtl)?1'b0:
+					
+					//TCTL[0];
+		
+		TCNT<=	(wrCnt)?wmemval_M:
+					(limHit&&limEn)?32'b0:
+					checkMilsec?(TCNT+32'd1):
+					TCNT;
+		TLIM<=(wrLim)?wmemval_M:TLIM;
+		//TCTL<=(wrCtl)?DBUSI:TCTL;
+	end
+	
+	//wire [31:0] DBUS_CNT = (rdCnt)?TCNT:32'd0;
+	//wire [31:0] DBUS_LIM = (rdLim)?TLIM:32'd0;
+	//wire [31:0] DBUS_CTL = (rdCtl)?{28'b0,TCTL}:32'd0;
+	
+	//wire [31:0] tout_M=(DBUS_CNT | DBUS_LIM | DBUS_CTL);
+	/*Timer timer(	.ABUS(memaddr_M),
+						.DBUSI(wmemval_M),
+						.WE(wrmem_M),
+						.CLK(clk),
+						.DBUSO(tout_M) ); */
+						
 	always @(posedge clk)
 		if(MemWE)
 			dmem[memaddr_M[(DMEMADDRBITS-1):DMEMWORDBITS]]<=wmemval_M;
@@ -217,12 +276,15 @@ module Project(
 		MemEnable?MemVal:
 		(memaddr_M==ADDRKEY)?{12'b0,KDATA}:
 		(memaddr_M==ADDRSW)? {6'b0,SDATA}:
+		(memaddr_M==ADDRHEX)?{8'b0,HexOut}:
+		(memaddr_M==ADDRLEDR)?{22'b0,LedrOut}:
+		(memaddr_M==ADDRTCNT)?TCNT:
+		(memaddr_M==ADDRTLIM)?TLIM:
+		(memaddr_M==ADDRTCTL)?{28'b0,TCTL}:
 		32'hDEADDEAD;
 	
 	// If LW is executed with the address targeting Hex or LEDR, it will grab the current output
 	wire [(DBITS-1):0] wregval_M=(selaluout_M&&!selmemout_M)?aluout_M:
-											selmemout_M&&(memaddr_M==ADDRLEDR)?{{22'b0},LedrOut}:
-											selmemout_M&&(memaddr_M==ADDRHEX)?{{8'b0},HexOut}:
 											selmemout_M?memout_M:
 											selpcplus_M?pcplus_M:
 											{(DBITS){1'bX}};
@@ -260,7 +322,6 @@ module Project(
 	
 	assign aluout_A = {alu_eq|alu_log|alu_mth};
 	
-	//do we actually need stall with branch prediction?
 	wire dobranch_A=(isbranch_A&&(aluout_A==1));
 	
 	wire [(DBITS-1):0] brtarg_A=pcplus_A+workingimm_A;
@@ -306,7 +367,6 @@ module Project(
 	wire flush_A=(mispred_B)&!isnop_M;
 	
 	reg [(DBITS-1):0] memaddr_M;
-	wire [(DBITS-1):0] wmemval_M=wrmem_M?regval2_M:{(DBITS){1'bX}};
 	always @(posedge clk)
 		if(wrmem_A|selmemout_A)
 			memaddr_M<=aluout_A;
@@ -332,8 +392,61 @@ module Project(
 		else begin
 			if(wrmem_M&&(memaddr_M==ADDRHEX))
 				HexOut[23:0] <= wmemval_M[23:0];
-			if(wrmem_M&&(memaddr_M==ADDRLEDR))
-				LedrOut <= wmemval_M[9:0];
+			//if(wrmem_M&&(memaddr_M==ADDRLEDR))
+				/*if(wrmem_M&&(memaddr_M==ADDRTCNT)) begin
+					HexOut[23:12]<=TCNT[11:0];
+					HexOut[11:0]<=wmemval_M[11:0];
+					LedrOut[9]<=1'b1;
+					LedrOut[7]<=1'b0;
+					LedrOut[5]<=1'b0;
+					LedrOut[0]<=1'b0;
+				end else if(wrmem_M&&(memaddr_M==ADDRTLIM)) begin
+					HexOut[23:12]<=TLIM[11:0];
+					HexOut[11:0]<=wmemval_M[11:0];
+					LedrOut[7]<=1'b1;
+					LedrOut[9]<=1'b0;
+					LedrOut[5]<=1'b0;
+					LedrOut[0]<=1'b0;
+				end else if(wrmem_M&&(memaddr_M==ADDRTCTL)) begin
+					HexOut[23:12]<={8'b0,TCTL[3:0]};
+					HexOut[11:0]<=wmemval_M[11:0];
+					LedrOut[5]<=1'b1;
+					LedrOut[9]<=1'b0;
+					LedrOut[7]<=1'b0;
+					LedrOut[0]<=1'b0;
+				end else if(rdCnt) begin
+					HexOut[23:12]<=TCNT[11:0];
+					HexOut[11:0]<=memout_M[11:0];
+					LedrOut[9:7]<=3'b111;
+					LedrOut[6:0]<=7'b0;
+				end else if(rdLim) begin
+					HexOut[23:12]<=TLIM[11:0];
+					HexOut[11:0]<=memout_M[11:0];
+					LedrOut[6:4]<=3'b111;
+					LedrOut[9:7]<=3'b0;
+					LedrOut[3:0]<=4'b0;
+				end else if(rdCtl) begin
+					HexOut[23:12]<={8'b0,TCTL[3:0]};
+					HexOut[11:0]<=memout_M[11:0];
+					LedrOut[3:1]<=3'b111;
+					LedrOut[9:4]<=6'b0;
+					LedrOut[0]<=1'b0;
+				end else begin
+					//HexOut[23:12]<={8'b0,TCTL};
+					//HexOut[11:0]<=TCNT[11:0];
+					HexOut[23:0]<=PC_M[23:0];
+					LedrOut<=10'd1;
+				end
+				
+					LedrOut[8]<=wrCnt;
+					LedrOut[6]<=wrLim;
+					LedrOut[4]<=wrCtl;
+												//memaddr_M==ADDRTLIM||
+												//memaddr_M==ADDRTCTL))
+				  //LedrOut<=10'd1;
+				//LedrOut <= wmemval_M[9:0];
+				//if(wrmem_M)
+					//HexOut[23:0]<=memaddr_M[23:0];*/
 		end
 	end
 
@@ -417,7 +530,7 @@ module Project(
 	reg prediction_M;
 	
 	always @(posedge clk) begin
-		prediction_M<=(isjump_A | isbranch_A)&&!isnop_A;
+		prediction_M<=(isjump_A || isbranch_A)&&!isnop_A;
 		prediction_W<=prediction_M&&!isnop_M;
 	
 		//initial regval1_A and regval2_A assignments handle RAW data hazard
@@ -434,36 +547,36 @@ module Project(
 						wregval_W; //assume sreg2_mux==11
 		
 		regval2_M<=regval2_A;
-		wregno_A<=(stall)?0:wregno_D;
+		wregno_A<=(!stall)?wregno_D:0;
 		wregno_M<=(!flush_A)?wregno_A:0;
 		wregno_W<=wregno_M;
-		wrreg_A<=(stall)?0:wrreg_D;
+		wrreg_A<=(!stall)?wrreg_D:0;
 		wrreg_M<=(!flush_A)?wrreg_A:0;
 		wrreg_W<=wrreg_M;
-		wrmem_A<=(stall)?0:wrmem_D;
+		wrmem_A<=(!stall)?wrmem_D:0;
 		wrmem_M<=(!flush_A)?wrmem_A:0;
 		wrmem_W<=wrmem_M;
-		isbranch_A<=(stall)?0:isbranch_D;
-		isjump_A<=(stall)?0:isjump_D;
-		selaluout_A<=(stall)?0:selaluout_D;
+		isbranch_A<=(!stall)?isbranch_D:0;
+		isjump_A<=(!stall)?isjump_D:0;
+		selaluout_A<=(!stall)?selaluout_D:0;
 		selaluout_M<=(!flush_A)?selaluout_A:0;
-		selmemout_A<=(stall)?0:selmemout_D;
+		selmemout_A<=(!stall)?selmemout_D:0;
 		selmemout_M<=(!flush_A)?selmemout_A:0;
-		selpcplus_A<=(stall)?0:selpcplus_D;
+		selpcplus_A<=(!stall)?selpcplus_D:0;
 		selpcplus_M<=(!flush_A)?selpcplus_A:0;
-		isnop_A<=(stall)?1'b1:isnop_D;
+		isnop_A<=(!stall)?isnop_D:1'b1;
 		isnop_M<=(!flush_A)?isnop_A:1'b1;
 		isnop_W<=isnop_M;
 		pcplus_A<=pcplus_D;
 		pcplus_M<=pcplus_A;
 		workingimm_A<=workingimm_D;
-		alufunc_A<=(stall)?0:alufunc_D;
-		dreg_A<=(stall)?0:dreg_D;
+		alufunc_A<=(!stall)?alufunc_D:0;
+		dreg_A<=(!stall)?dreg_D:0;
 		dreg_M<=(!flush_A)?dreg_A:0;
 		dreg_W<=dreg_M;
-		sreg1_A<=(stall)?0:rs_D;
-		sreg2_A<=(stall)?0:rt_D;
-		aluimm_A<=(stall)?0:aluimm_D;
+		sreg1_A<=(!stall)?rs_D:0;
+		sreg2_A<=(!stall)?rt_D:0;
+		aluimm_A<=(!stall)?aluimm_D:0;
 		wregval_W<=wregval_M;
 		PC_D<=PC;
 		PC_A<=PC_D;
@@ -487,9 +600,8 @@ module Project(
   wire W1;
   wire W2;
 	 assign sreg1_mux= {(M1 || W1),(A1 || W1)};
-	 //assign sreg1_mux[1]= (M1 || W1);
 	 assign sreg2_mux= {(M2 || W2),(A2 || W2)};
-	 //assign sreg2_mux[1]= (M2 || W2);
+	 
   Funit forward (
     .sreg1		(rregno1_D),
 	 .sreg2		(rregno2_D),

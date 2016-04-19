@@ -1,0 +1,22 @@
+; Addresses for I/O
+.NAME	HEX= 0xFFFFF000
+.NAME	LEDR=0xFFFFF020
+.NAME	KEY= 0xFFFFF080
+.NAME	SW=  0xFFFFF090
+.NAME TCNT=0xFFFFF100
+.NAME TLIM=0xFFFFF104
+.NAME TCTL=0xFFFFF108
+
+
+
+	.ORIG 0x100
+	ADDI a0,Zero,1000
+	SW a0,TLIM(Zero)
+	SW Zero,TCTL(Zero)
+TestLoop:
+	LW s1,TCNT(Zero)
+	ADD s0, Zero, Zero
+	ADD s2, Zero, Zero
+	SW s1, HEX(Zero)
+	ADD t0, Zero, Zero
+	BR  TestLoop
