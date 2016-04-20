@@ -1,96 +1,207 @@
 ; Addresses for I/O
 .NAME	HEX= 0xFFFFF000
 .NAME	LEDR=0xFFFFF020
-.NAME	KEY= 0xFFFFF080
+.NAME	KDATA= 0xFFFFF080
+.NAME	KCTL= 0xFFFFF0x84
 .NAME	SW=  0xFFFFF090
+.NAME	SWCTl= 0xFFFFF094
 .NAME TCNT=0xFFFFF100
 .NAME TLIM=0xFFFFF104
 .NAME TCTL=0xFFFFF108
+.NAME SECLO=0xF
+.NAME SECHI=0xF0
+.NAME SECLOMAX=0x9
+.NAME SECHIMAX=0x50
+.NAME MINLO=0xF00
+.NAME MINLOMAX=0x900
+.NAME MINHI=0xF000
+.NAME MINHIMAX=0x5000
+.NAME HRLO=0xF0000
+.NAME HRHI=0xF00000
+.NAME HRLOMAX=0x90000
+
+.NAME INCSECLOW=0x1
+.NAME INCSECHIGH=0x10
+.NAME INCMINLOW=0x100
+.NAME INCMINHIGH=0x1000
+.NAME INCHRLOW=0x10000
+.NAME INCHRHIGH=0x100000
+
+.NAME HRMAX=0x230000
+.NAME MINSMAX=0x5900
+.NAME SECSMAX=0x59
 
 
 
 	.ORIG 0x100
-	ADDI a0,Zero,1000
-	ADDI s0,Zero,0; ONE DENOTES CLOCK DISP, ZERO DENOTES CLOCK SET
+	ADDI a0,Zero,10
+	ADDI s0,Zero,0; ONE DENOTES CLOCK SET, ZERO DENOTES CLOCK DISP
 	SW a0,TLIM(Zero)
-	ANDI t1,Zero,0
-	SW t1,HEX(Zero)
-	SW t1,TCTL(Zero)
+	LW t1,HrMaxVal(Zero)
+	ADD t0,Zero,t1; t0=23 hrs
+	LW t1,MinsMaxVal(Zero)
+	ADD t0,t0,t1; t0=23 hrs 59 mins
+	LW t1,SecHiMaxVal(Zero)
+	SUBI t1,t1,11
+	ADD t0,t0,t1; t0=23 hrs 59 mins 45 secs
+	SW Zero,TCTL(Zero)
+	SW t0,HEX(Zero)
+	ADDI a1,Zero,1
+	ADDI a2,Zero,100
+	ADDI a5,Zero,0
 ClockLoop:
+	LW a3,KDATA(Zero)
+	LW a4,KCTL(Zero)
+	EQ a6,a5,Zero; a6=1 if the current key press timer is at 0 secs
+	EQ a7,a4,a1; a7=1 if the ready bit is set (disregarding overrun)
+	AND a8,a6,a7; a8=1 if ready bit is set and key press timer is at 0 secs (this will detect no_key->key)
+	NEQ a9,a5,Zero; a9=1 if key timer isn't at 0 secs
+	OR a8,a8,a9; a8=1 if the key timer is at 0 secs and the ready bit is set or if the key timer isn't at 0 secs
+	AND a4,a4,a8; a4=1 if key0 is pressed and either the keytimer is > 0 secs or if it's ==0 secs and ready bit is set
+				; will be 0 if key0 isn't being pressed at all
+	ADD a5,a5,a4; will increment key timer by 1 if key0 is being pressed
+	;next instr will 0 out counter if key0 isn't being pressed at all
+	BGE a3,a4,KeyPress
+	BLE a3,a4,KeyReleasex
+ClockContA:
+	ADDI a4,a3,0
 	LW s1,TCTL(Zero)
-	BGT s1,Zero,IncSecLo
+	NOT t0,s1
+	SW t0,TCTL(Zero); 
+	ADD a0,a0,s1; will increment if ready bit is set
+	BEQ a0,a2,IncSecLo; branch if we've counted 100 hundreths of a second
 	BR  ClockLoop
+KeyPress:
+	ADDI a5,Zero,1
+	BR ClockContinueA
+KeyRelease:
+	ADDI a5,Zero,0
+	BR ClockContinueA
 IncSecLo:
 	LW s2,HEX(Zero)
-	ANDI s3,s2,15; grab the low sec digit
-	ADDI t0,Zero,9
+	LW t0,SecLoVal(Zero)
+	AND s3,s2,t0; grab the low sec digit
+	LW t0,SecLoMaxVal(Zero)
 	BEQ s3,t0,IncSecHi; if it's 9, jump, otherwise, add a sec and update
-	ADDI s2,s2,1
-	ADDI s1,Zero,0
+	LW t1,SecLoIncVal(Zero)
+	ADD s2,s2,t1; secs +1
 	SW s2,HEX(Zero)
-	SW s1,TCTL(Zero)
+	AND a0,a0,Zero
 	BR ClockLoop
 IncSecHi:
-	ANDI s3,s2,240; grab the higher sec digit
-	ADDI t0,Zero,80; check if sec hi is 5
+	LW t0,SecHiVal(Zero)
+	AND s3,s2,t0; grab the higher sec digit
+	LW t0,SecHiMaxVal(Zero); check if sec hi is 5
 	BEQ s3,t0,IncMinLo; increment the minute if secs==59, otherwise add increment sec hi, zero sec lo, and update
-	ADDI s2,s2,16; +10 secs
-	SUBI s2,s2,9; secs has to be 9 here, so sub 9 to make it 0
-	ADDI s1,Zero,0
+	LW t0,SecHiIncVal(Zero)
+	ADD s2,s2,t0; +10 secs
+	LW t0,SecLoMaxVal(Zero)
+	SUB s2,s2,t0; secs has to be 9 here, so sub 9 to make it 0
 	SW s2,HEX(Zero)
-	SW s1,TCTL(Zero)
+	AND a0,a0,Zero
 	BR ClockLoop
 IncMinLo:
-	ANDI s3,s2,3840; grab the lower min digit
-	ADDI t0,Zero,2304; check if min lo is 9
-	BEQ s3,t0,IncHourHi; if min lo is 9, need to inc min hi, else inc min lo and reset secs
-	ADDI s2,s2,256; +1 min
-	SUBI s2,s2,89; -59 secs
-	ADDI s1,Zero,0
+	LW t0,MinLoVal(Zero)
+	AND s3,s2,t0; grab the lower min digit
+	LW t0,MinLoMaxVal(Zero); check if min lo is 9
+	BEQ s3,t0,IncMinHi; if min lo is 9, need to inc min hi, else inc min lo and reset secs
+	LW t0,MinLoIncVal(Zero)
+	ADD s2,s2,t0; +1 min
+	LW t0,SecsMaxVal(Zero)
+	SUB s2,s2,t0; -59 secs
 	SW s2,HEX(Zero)
-	SW s1,TCTL(Zero)
+	AND a0,a0,Zero
 	BR ClockLoop
 IncMinHi:
-	ANDI s3,s2,61440; grab higher min digit
-	ADDI t0,Zero,10240; check if min hi is 5 (20480)
-	ADDI t0,t0,10240; 
+	LW t0,MinHiVal(Zero)
+	AND s3,s2,t0; grab higher min digit
+	LW t0,MinHiMaxVal(Zero); check if min hi is 5 
 	BEQ s3,t0,IncHourLo; if mins==59, inc hour, otherwise do +10mins and reset min lo and secs
-	ADDI s2,s2,4096; +10 mins
-	SUBI s2,s2,2393; -9 mins and 59 secs
-	ADDI s1,Zero,0
+	LW t0,MinHiIncVal(Zero)
+	ADD s2,s2,t0; +10 mins
+	LW t0,MinLoMaxVal(Zero)
+	LW t1,SecsMaxVal(Zero)
+	ADD t0,t0,t1; t0=9 mins 59 secs
+	SUB s2,s2,t0; -9 mins and 59 secs
 	SW s2,HEX(Zero)
-	SW s1,TCTL(Zero)
+	AND a0,a0,Zero
 	BR ClockLoop
 IncHourLo:
-	ADDI t1,Zero,1020
-	ADDI t2,Zero,0
-	ADDI t3,Zero,0
-HLLoop:
-	ADDI t3,t3,16384; add this 1020 times
-	ADDI t2,t2,1
-	BNE t1,t2,HLLoop
-	AND s3,s2,t3; grab both hr digits (t3=16711680) 2^14 1020 times
-	
-	ADDI t0,Zero,2293760; check if hrs==23
-	BEQ s3,t0,SetZero; reset clock display if 23:59:59, else, check if hr lo is 9
-	ADDI t0,Zero,589824; hrlo==9
+	LW t1,HrLoVal(Zero)
+	LW t2,HrHiVal(Zero)
+	ADD t1,t1,t2; t1=hrs lo + hrs hi
+	AND s3,s2,t1
+	LW t0,HrMaxVal(Zero); check if hrs==23
+	BEQ s3,t0,SetZero; set clock display to 00:00:00 if 23:59:59, else, check if hr lo is 9
+	LW t0,HrLoMaxVal(Zero); hrlo==9
 	BEQ s3,t0,IncHrHi; increment the hi hour digit if lo is 9, otherwise add an hour and reset mins and secs
-	ADDI s2,s2,65536; +1hr lo
-	SUBI s2,s2,22873; -59 mins 59 secs
-	ADDI s1,Zero,0
+	LW t0,HrLoIncVal(Zero)
+	ADD s2,s2,t0; +1hr lo
+	LW t0,MinsMaxVal(Zero); t0=59 mins
+	LW t1,SecsMaxVal(Zero); t1=59 secs
+	ADD t0,t0,t1; t0=59 mins 59 secs
+	SUB s2,s2,t0; -59 mins 59 secs
 	SW s2,HEX(Zero)
-	SW s1,TCTL(Zero)
+	AND a0,a0,Zero
 	BR ClockLoop
 IncHourHi:
-	ANDI s3,s2,15728640; grab higher hr digit
-	ADDI s2,s2,1048576; +10 hrs
-	SUBI s2,s2,612697; -9 hrs 59 mins 59 secs
-	ADDI s1,Zero,0
+	LW t0,HrHiVal(Zero)
+	AND s3,s2,t0; grab higher hr digit
+	LW t0,HrHiIncVal(Zero)
+	ADD s2,s2,t0; +10 hrs
+	LW t0,HrLoMaxVal(Zero)
+	LW t1,MinsMaxVal(Zero)
+	ADD t0,t0,t1; t0=9 hrs 59 mins
+	LW t1,SecsMaxVal(Zero)
+	ADD t0,t0,t1; t0=9 hrs 59 mins 59 secs
+	SUB s2,s2,t0; -9 hrs 59 mins 59 secs
 	SW s2,HEX(Zero)
-	SW s1,TCTL(Zero)
+	AND a0,a0,Zero
 	BR ClockLoop
 SetZero:
-	ADDI s1,Zero,0
-	SW s1,HEX(Zero)
-	SW s1,TCTL(Zero)
+	SW Zero,HEX(Zero)
+	AND a0,a0,Zero
 	BR ClockLoop
+
+SecLoVal:
+	.WORD SECLO
+SecLoMaxVal:
+	.WORD SECLOMAX
+SecHiVal:
+	.WORD SECHI
+SecHiMaxVal:
+	.WORD SECHIMAX
+MinLoVal:
+	.WORD MINLO
+MinLoMaxVal:
+	.WORD MINLOMAX
+MinHiVal:
+	.WORD MINHI
+MinHiMaxVal:
+	.WORD MINHIMAX
+HrLoVal:
+	.WORD HRLO
+HrLoMaxVal:
+	.WORD HRLOMAX
+HrHiVal:
+	.WORD HRHI
+
+SecLoIncVal:
+	.WORD INCSECLOW
+SecHiIncVal:
+	.WORD INCSECHIGH
+MinLoIncVal:
+	.WORD INCMINLOW
+MinHiIncVal:
+	.WORD INCMINHIGH
+HrLoIncVal:
+	.WORD INCHRLOW
+HrHiIncVal:
+	.WORD INCHRHIGH
+
+HrMaxVal:
+	.WORD HRMAX
+MinsMaxVal:
+	.WORD MINSMAX
+SecsMaxVal:
+	.WORD SECSMAX
