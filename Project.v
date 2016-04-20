@@ -28,7 +28,7 @@ module Project(
   parameter ADDRTCNT	=32'hFFFFF100;
   parameter ADDRTLIM	=32'hFFFFF104;
   parameter ADDRTCTL	=32'hFFFFF108;
-  parameter IMEMINITFILE="Test2.mif";
+  parameter IMEMINITFILE="Sorter3.mif";
   parameter IMEMADDRBITS=16;
   parameter IMEMWORDBITS=2;
   parameter IMEMWORDS=(1<<(IMEMADDRBITS-IMEMWORDBITS));
@@ -66,12 +66,9 @@ module Project(
   parameter OP2_NXOR =OP2_XOR|6'b001000;
   
   //clock frequency
-  parameter FREQ = 10'd113;
+  parameter FREQ = 10'd100;
   parameter MILLISEC = FREQ*24'd10000;
   
-  
-	
-	parameter BITS = 32;
 	parameter KCTLADDR = 32'hFFFFF084;
 	parameter SCTLADDR = 32'hFFFFF094;
 	
@@ -225,27 +222,27 @@ module Project(
 	wire selCtlS = (abus == SCTLADDR);
 	wire wrDataS = selDataS && wrmem_M;
 	wire rdDataS = selDataS && (selmemout_M);
-	wire wrCtlS = selCtlS && wrmem_M && !(wmemval_M[0] | wmemval_M[1]);
-	wire wrCtlChkS = selCtlS && wrmem_M && (wmemval_M[0] | wmemval_M[1]);
+	wire wrCtlS = selCtlS && wrmem_M;
+	//wire wrCtlChkS = selCtlS && wrmem_M && (wmemval_M[0] | wmemval_M[1]);
 	wire rdCtlS = selCtlS && (selmemout_M);
 	
 	wire selDataK = (abus == ADDRKEY);
 	wire selCtlK = (abus == KCTLADDR);
 	wire wrDataK = selDataK && wrmem_M;
 	wire rdDataK = selDataK && (selmemout_M);
-	wire wrCtlK = selCtlK && wrmem_M && !(wmemval_M[0] | wmemval_M[1]);
-	wire wrCtlChkK = selCtlK && wrmem_M && (wmemval_M[0] | wmemval_M[1]);
+	wire wrCtlK = selCtlK && wrmem_M;
+	//wire wrCtlChkK = selCtlK && wrmem_M && (wmemval_M[0] | wmemval_M[1]);
 	wire rdCtlK = selCtlK && (selmemout_M);
 	
 	wire selCntT = (abus == ADDRTCNT);
-	wire wrCntT = selCntT && wrmem_M;
+	wire wrCntT = selCntT & wrmem_M;
 	wire rdCntT = selCntT & selmemout_M;
 	wire selCtlT = (abus == ADDRTCTL);
 	wire rdCtlT = selCtlT & selmemout_M;
-	wire wrCtlT = selCtlT && wrmem_M;
+	wire wrCtlT = selCtlT & wrmem_M;
 	wire selLimT = (abus == ADDRTLIM);
-	wire wrLimT = selLimT && wrmem_M;
-	wire rdLimT = selLimT && selmemout_M;
+	wire wrLimT = selLimT & wrmem_M;
+	wire rdLimT = selLimT & selmemout_M;
 	
 	//Timer limit register
 	reg [31:0] TCNT=32'b0;
@@ -257,32 +254,34 @@ module Project(
 	//will change the size of TCTL as needed
 	//count of clock cycles to track 1 millisecond
 	wire checkMilsec = (count==(MILLISEC-1));
-	wire limHit = TCNT==(TLIM-1) & (TLIM!=0);
+	wire limHit = (TCNT==(TLIM-1)) & (TLIM!=0);
 	
 	//basically, if it hasn't been a millisecond, feed back in same values. If TCNT is within
 	//the TLIM-1 range, increment it. If TLIM is nonzero and TCNT is out of bounds, the read
 	//bit is set and TCNT goes back to 0. If the read bit was already set, the overflow bit
 	//gets set.
+	wire [31:0] tctlbus;
+	wire [31:0] tcntbus;
+	
+	assign tctlbus=wrCtlT?TCTL&dbus:32'bz;
+	assign tctlbus=limHit&TCTL[0]?32'b0011:32'bz;
+	assign tctlbus=limHit&!TCTL[0]?32'b0001:32'bz;
+	assign tctlbus=!(limHit|wrCtlT)?TCTL:32'bz;
+	
+	assign tcntbus=(wrCntT)?dbus:32'bz;
+	assign tcntbus=((!wrCntT) & limHit)?0:32'bz;
+	assign tcntbus=(!(wrCntT|limHit)&checkMilsec)?TCNT+1:32'bz;
+	assign tcntbus=(!(checkMilsec|wrCntT|limHit))?TCNT:32'bz;
+	
 	always @(posedge clk) begin
-		count<=limHit?32'b0:count+32'd1;
-		TCTL<=(wrCtlT)?TCTL&dbus:
-					(limHit&TCTL[0])?32'b0011:
-					(limHit)?32'b0001:
-					TCTL;
-		//TCTL[0]<=(wrCtl)?1'b0:
-					
-					//TCTL[0];
-		
-		TCNT<=	(wrCntT)?wmemval_M:
-					(limHit)?32'b0:
-					checkMilsec?(TCNT+32'd1):
-					TCNT;
-		TLIM<=(wrLimT)?wmemval_M:TLIM;
-		//TCTL<=(wrCtl)?DBUSI:TCTL;
+		count<=checkMilsec?32'b0:count+32'd1;
+		TCTL<=tctlbus;
+		TCNT<=tcntbus;
+		TLIM<=(wrLimT)?wmemval_M:32'bz;
 	end
 		// Now the real data memory
 	wire fromdmem = (memaddr_M<ADDRHEX) & !wrmem_M;
-	wire todmem = wrmem_M & (!(selDataS | selDataK));
+	wire todmem = wrmem_M & !(selDataS|selDataK);
 	wire [(DBITS-1):0] dbus;
 	
 	assign dbus = todmem?wmemval_M:{(DBITS){1'bz}};
@@ -305,14 +304,12 @@ module Project(
 				wrDataK?{{28{1'b0}},KEY[3:0]}:wrDataS?{{22{1'b0}},SW[9:0]}:{(DBITS){1'bz}};
 	*/
 	wire [(DBITS-1):0] abus = memaddr_M;
-	wire MemEnable=!(memaddr_M[(DBITS-1):DMEMADDRBITS]);
-	wire MemWE=wrmem_M&MemEnable;
 	(* ram_init_file = IMEMINITFILE, ramstyle="no_rw_check" *)
 	reg [(DBITS-1):0] dmem[(DMEMWORDS-3):0];
 	always @(posedge clk)
-		if(MemWE)
-			dmem[memaddr_M[(DMEMADDRBITS-1):DMEMWORDBITS]]<=wmemval_M;
-	wire [(DBITS-1):0] MemVal=MemWE?{DBITS{1'bX}}:dmem[memaddr_M[(DMEMADDRBITS-1):DMEMWORDBITS]];
+		if(wrmem_M)
+			dmem[memaddr_M[(DMEMADDRBITS-1):DMEMWORDBITS]]<=dbus;
+	wire [(DBITS-1):0] MemVal=wrmem_M?{DBITS{1'bX}}:dmem[memaddr_M[(DMEMADDRBITS-1):DMEMWORDBITS]];
 	// Connect memory and input devices to the bus
 	//wire [(DBITS-1):0] memout_M=MemEnable?MemVal:32'hDEADDEAD;
 	
