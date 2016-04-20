@@ -59,20 +59,15 @@ ClockLoop:
 	AND a5,a5,Zero; zero out key timer if key0 isn't being pressed
 UpdKeyTimer:
 	EQ a4,a3,a1
-	ADD a5,a5,a4; will increment key timer by 1 if key0 is being pressed, will stay 0 if key0 not pressed
-	BEQ a5,s5,ClockSet
 	LW s1,TCTL(Zero)
 	NOT t0,s1
 	SW t0,TCTL(Zero); 
 	ADD a0,a0,s1; will increment if ready bit is set
+	AND a4,a4,s1; a4=1 if key0 is being pressed and if the timer has the ready bit set
+	ADD a5,a5,a4; increment key timer by 1 if key0 is being pressed and the timer's ready bit is set
+	BEQ a5,s5,ClockSet
 	BEQ a0,a2,IncSecLo; branch if we've counted 100 hundreths of a second
 	BR  ClockLoop
-KeyPress:
-	ADDI a5,Zero,1
-	BR ClockContinueA
-KeyRelease:
-	ADDI a5,Zero,0
-	BR ClockContinueA
 IncSecLo:
 	LW s2,HEX(Zero)
 	LW t0,SecLoVal(Zero)
