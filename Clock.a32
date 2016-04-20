@@ -10,6 +10,7 @@
 .NAME TCTL=0xFFFFF108
 .NAME SECLO=0xF
 .NAME SECHI=0xF0
+.NAME SECS=0xFF
 .NAME SECLOMAX=0x9
 .NAME SECHIMAX=0x50
 .NAME MINLO=0xF00
@@ -46,11 +47,14 @@
 	ADD t0,t0,t1; t0=23 hrs 59 mins 45 secs
 	SW Zero,TCTL(Zero)
 	SW t0,HEX(Zero)
+Disp:
 	ADDI a1,Zero,1
 	ADDI a2,Zero,100
 	ADDI a5,Zero,0
 	ADDI s5,Zero,200
+	ADDI a10,Zero,500
 ClockLoop:
+	ANDI s0,Zero,0; set mode to display
 	LW a3,KDATA(Zero)
 	ANDI a3,a3,1; is 1 if key0 is being pressed
 	GT t8,a5,Zero
@@ -67,6 +71,7 @@ UpdKeyTimer:
 	ADD a5,a5,a4; increment key timer by 1 if key0 is being pressed and the timer's ready bit is set
 	BEQ a5,s5,ClockSet
 	BEQ a0,a2,IncSecLo; branch if we've counted 100 hundreths of a second
+	BNE s0,Zero,ClockSetLoop
 	BR  ClockLoop
 IncSecLo:
 	LW s2,HEX(Zero)
@@ -78,6 +83,7 @@ IncSecLo:
 	ADD s2,s2,t1; secs +1
 	SW s2,HEX(Zero)
 	AND a0,a0,Zero
+	BNE s0,Zero,ClockSetLoop
 	BR ClockLoop
 IncSecHi:
 	LW t0,SecHiVal(Zero)
@@ -90,8 +96,15 @@ IncSecHi:
 	SUB s2,s2,t0; secs has to be 9 here, so sub 9 to make it 0
 	SW s2,HEX(Zero)
 	AND a0,a0,Zero
+	BNE s0,Zero,ClockSetLoop
 	BR ClockLoop
 IncMinLo:
+	BEQ s0,Zero,Skip
+	LW t0,SecsMaxVal(Zero); have secs wrap when in clock set mode
+	SUB s2,s2,t0
+	SW s2,HEX(Zero)
+	BR ClockSetLoop
+Skip:
 	LW t0,MinLoVal(Zero)
 	AND s3,s2,t0; grab the lower min digit
 	LW t0,MinLoMaxVal(Zero); check if min lo is 9
@@ -158,10 +171,75 @@ SetZero:
 
 ClockSet:
 	ANDI a5,Zero,0; set key timer counter back to 0
-	NOT t0,Zero
-	SW t0,LEDR(Zero)
-	BEQ Zero,Zero,ClockSet
+	ADDI s0,Zero,1; set mode to cock set
+	ANDI t4,Zero,0
+	ANDI t6,Zero,0
+	ANDI t6,Zero,0
+	ANDI t7,Zero,0
+	ANDI s4,Zero,0
+	ANDI s5,Zero,0
+	ANDI s6,Zero,0
+	ANDI s7,Zero,0
+	ADDI t13,Zero,15
+ClockSetLoop:
+	NOT t12,Zero
+	SW t12,LEDR(Zero)
+	ADD s4,Zero,t4; store last cycle's key vals
+	ADD s5,Zero,t5
+	ADD s6,Zero,t6
+	ADD s7,Zero,t7
+	LW a3,KDATA(Zero)
+	ADDI t4,Zero,14; only key0 being pressed
+	NEQ s8,t4,a3
+	ADDI t5,Zero,13; only key1 being pressed
+	NEQ s9,t5,a3
+	ADDI t6,Zero,11; only key2 being pressed
+	NEQ s10,t6,a3
+	ADDI t7,Zero,7; only key3 being pressed
+	NEQ s11,t7,a3
 
+	AND s4,s4,s8; key0 was pressed but now isn't
+	AND s5,s5,s9; key1 was pressed but now isn't
+	AND s6,s6,s10; key2 was pressed but now isn't
+	AND s7,s7,s11; key3 was pressed but now isn't
+
+	BEQ s4,a1,SetDecMinLo
+	BEQ s5,a1,SetIncMinLo
+	BEQ s6,a1,SetDecHrLo
+	BEQ s7,a1,SetIncHrLo
+
+	BNE a3,t13,UpdKeyTimerSet ; branch if any key pressed
+	AND a5,a5,Zero; zero out key timer if any key is pressed
+UpdKeyTimerSet:
+	LW s1,TCTL(Zero)
+	NOT t0,s1
+	SW t0,TCTL(Zero); 
+	ADD a0,a0,s1; will increment if ready bit is set
+	EQ a4,a13,a3; a4=1 if no key is being pressed
+	AND a4,a4,s1; a4=1 if no key is being pressed and if the timer has the ready bit set
+	ADD a5,a5,a4; increment key timer by 1 if key0 is being pressed and the timer's ready bit is set
+	BEQ a5,a10,Disp; go back to display mode if 5 seconds have passed without a keypress
+	BEQ a0,a2,IncSecLo; branch if we've counted 100 hundreths of a second
+	BR  ClockSetLoop
+
+SetDecMinLo:
+	LW s2,HEX(Zero)
+	LW t0,MinLoVal(Zero)
+	AND s3,s2,t0; grab the lower min digit
+	BEQ s3,Zero,SetDecMinHi; if min lo is 0, decrement min hi
+	LW t0,MinLoIncVal(Zero)
+	SUB s2,s2,t0; -1 min
+	LW t0,SecsVal(Zero)
+	AND t0,s2,t0; grab seconds
+	SUB s2,s2,t0; -set secs to 0
+	SW s2,HEX(Zero)
+	BR UpdKeyTimerSet; let secs increment per normal
+
+SetDecMinHi:
+BR UpdKeyTimerSet;
+
+SecsVal:
+	.WORD SECS
 SecLoVal:
 	.WORD SECLO
 SecLoMaxVal:
