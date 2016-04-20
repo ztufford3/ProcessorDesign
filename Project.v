@@ -28,7 +28,7 @@ module Project(
   parameter ADDRTCNT	=32'hFFFFF100;
   parameter ADDRTLIM	=32'hFFFFF104;
   parameter ADDRTCTL	=32'hFFFFF108;
-  parameter IMEMINITFILE="Sorter3.mif";
+  parameter IMEMINITFILE="Clock.mif";
   parameter IMEMADDRBITS=16;
   parameter IMEMWORDBITS=2;
   parameter IMEMWORDS=(1<<(IMEMADDRBITS-IMEMWORDBITS));
@@ -66,11 +66,11 @@ module Project(
   parameter OP2_NXOR =OP2_XOR|6'b001000;
   
   //clock frequency
-  parameter FREQ = 10'd100;
-  parameter MILLISEC = FREQ*24'd10000;
+  parameter FREQ = 10'd96;
+  parameter MILLISEC = FREQ*24'd1000;
   
-	parameter KCTLADDR = 32'hFFFFF084;
-	parameter SCTLADDR = 32'hFFFFF094;
+  parameter KCTLADDR = 32'hFFFFF084;
+  parameter SCTLADDR = 32'hFFFFF094;
 	
 	
   
@@ -87,13 +87,11 @@ module Project(
 	wire key_ready=(KEY!=KDATA);
 	//set high if ready is still 1 when KDATA changes
 	wire key_overrun=key_ready&&(KCTL[0]);
-	//control bit. 0 for now
-	wire key_ie=0;
 	
 	 always @(posedge clk) begin
 		oldkey<=KEY;
 		//...bit 4 is ie? Does he mean bit 3? Is a bit just always 0? Should this just be 3 bits?
-		KCTL<={key_ie,1'b0,key_overrun,key_ready};
+		KCTL<={2'b0,key_overrun,key_ready};
 		KDATA<={key3press,key2press,key1press,key0press};
 		//read from KDATA sets ready bit to 0
 		if(memaddr_M==ADDRKEY && selmemout_M)
@@ -247,7 +245,7 @@ module Project(
 	//Timer limit register
 	reg [31:0] TCNT=32'b0;
 	//Timer control register
-	reg [31:0] TCTL=32'b0;
+	reg [31:0] TCTL=32'd1;
 	//Timer count register
 	reg [31:0] TLIM=32'b0;
 	reg [31:0] count=32'b0;
@@ -260,24 +258,32 @@ module Project(
 	//the TLIM-1 range, increment it. If TLIM is nonzero and TCNT is out of bounds, the read
 	//bit is set and TCNT goes back to 0. If the read bit was already set, the overflow bit
 	//gets set.
-	wire [31:0] tctlbus;
-	wire [31:0] tcntbus;
+	//wire [31:0] tctlbus;
+	//wire [31:0] tcntbus;
 	
-	assign tctlbus=wrCtlT?TCTL&dbus:32'bz;
-	assign tctlbus=limHit&TCTL[0]?32'b0011:32'bz;
-	assign tctlbus=limHit&!TCTL[0]?32'b0001:32'bz;
-	assign tctlbus=!(limHit|wrCtlT)?TCTL:32'bz;
+	//assign tctlbus=wrCtlT?TCTL&dbus:32'bz;
+	//assign tctlbus=limHit&TCTL[0]?32'b0011:32'bz;
+	//assign tctlbus=limHit&!TCTL[0]?32'b0001:32'bz;
+	//assign tctlbus=!(limHit|wrCtlT)?TCTL:32'bz;
 	
-	assign tcntbus=(wrCntT)?dbus:32'bz;
-	assign tcntbus=((!wrCntT) & limHit)?0:32'bz;
-	assign tcntbus=(!(wrCntT|limHit)&checkMilsec)?TCNT+1:32'bz;
-	assign tcntbus=(!(checkMilsec|wrCntT|limHit))?TCNT:32'bz;
+	//assign tcntbus=(wrCntT)?dbus:32'bz;
+	//assign tcntbus=((!wrCntT) & limHit)?0:32'bz;
+	//assign tcntbus=(!(wrCntT|limHit)&checkMilsec)?TCNT+1:32'bz;
+	//assign tcntbus=(!(checkMilsec|wrCntT|limHit))?TCNT:32'bz;
 	
 	always @(posedge clk) begin
-		count<=checkMilsec?32'b0:count+32'd1;
-		TCTL<=tctlbus;
-		TCNT<=tcntbus;
-		TLIM<=(wrLimT)?wmemval_M:32'bz;
+		
+		count<=checkMilsec?32'b0:(count+32'd1);
+		
+		TCTL<=	wrCtlT?TCTL&wmemval_M:
+					limHit&TCTL[0]?32'd3:
+					limHit?32'd1:
+					TCTL;
+		TCNT<=	wrCntT?wmemval_M:
+					limHit?32'b0:
+					checkMilsec?(TCNT+32'd1):
+					TCNT;
+		TLIM<=(wrLimT)?wmemval_M:TLIM;
 	end
 		// Now the real data memory
 	wire fromdmem = (memaddr_M<ADDRHEX) & !wrmem_M;
@@ -429,14 +435,14 @@ module Project(
 		if (reset) begin
 			HDATA<=24'hFEDEAD;
 		end else
-		HDATA<=wrDataH?dbus:HDATA;
+		HDATA<=wrDataH?wmemval_M:HDATA;
 	end
 	
 	always @(posedge clk or posedge reset) begin
 		if (reset)
 			LDATA<=0;
 		else
-		LDATA<=wrDataL?dbus:LDATA;
+		LDATA<=wrDataL?wmemval_M:LDATA;
 	end
 	
 	//always @(posedge clk or posedge reset) begin
