@@ -197,6 +197,7 @@ ClockSet:
 	ANDI s10,Zero,0
 	ANDI s11,Zero,0
 	ADDI a12,Zero,50
+	ANDI a14,Zero,0
 ClockSetLoop:
 
 	AND s8,s4,t8; s8=key0 was the only key pressed last cycle and this cycle other keys were added
@@ -268,16 +269,19 @@ UpdKeyTimerSet:
 	LW t0,SCTL(Zero)
 	ANDI t0,t0,1; check if switch ready bit is set
 	BNE t0,a1,ReadSw; don't update switch values if the ready bit is not set
-	LW t1,SDATA(Zero); grab switch values
+	LW a14,SDATA(Zero); grab switch values
 	SW Zero,SCTL(Zero)
 ReadSw:
-	EQ t3,t1,Zero; t3 is 1 if no switch is high, else it's 0
+	EQ t3,a14,Zero; t3 is 1 if no switch is high, else it's 0
+	BNE t3,Zero,Blink; blink if no switch is high, else count 100th's of seconds since last key press
+	ADDI t0,a5,0; store key press timer in t0 to load into LEDR
+	BR SwLedr; skip the blink functionality
+Blink:
 	ADDI t0,Zero,0
 	BLE a0,a12,SwLedr; if not within the correct half second range, just keep LEDR's 0
 	NOT t0,t0
 SwLedr:
-	SW t0,LEDR(Zero); simply blink every 0.5 secs
-
+	SW t0,LEDR(Zero); simply blink every 0.5 secs or show 100th's of a second since last key press
 	BEQ a5,a10,Disp; go back to display mode if 5 seconds have passed without a keypress
 	BEQ a0,a2,IncSecLo; branch if we've counted 100 hundreths of a second
 	BR  ClockSetLoop
@@ -334,7 +338,7 @@ SetIncMinHi:
 	AND s3,s2,t0; grab the higher min digit
 	LW t0,MinHiIncVal(Zero)
 	LW t1,MinHiMaxVal(Zero)
-	BNE s3,t1,WrapMinHiDecr; if min hi isn't 5, just increment, otherwise, we need to wrap the value
+	BNE s3,t1,WrapMinHiIncr; if min hi isn't 5, just increment, otherwise, we need to wrap the value
 	SUB s2,s2,t1; min hi must be 5, so set it to 0
 	BEQ Zero,Zero,SkipAdd
 WrapMinHiIncr:
@@ -345,6 +349,33 @@ SkipAdd:
 	SUB s2,s2,t0; set secs to 0
 	SW s2,HEX(Zero)
 	BR UpdKeyTimerSet; let secs increment per normal
+
+SetDecHrLo:
+	LW s2,HEX(Zero)
+	LW t0,HrLoVal(Zero)
+	LW t1,HirHiVal(Zero)
+	ADD t1,t0,t1
+	AND s3,s2,t1; grab both hour digits
+	BNE s3,Zero,NotHrMin; branch if hours!=0
+	LW t1,HrMaxVal(Zero)
+	ADD s2,s2,t1; set hrs to 23
+	SW s2,HEX(Zero)
+	BR UpdKeyTimerSet
+NotHrMin:
+	AND s3,s2,t0; grab lower hr digit
+	BEQ s3,Zero,SetDecHrHi; branch if hr lo digit is 0
+	LW t0,HrLoIncVal(Zero)
+	SUB s2,s2,t0; -1 hr
+	SW s2,HEX(Zero)
+	BR UpdKeyTimerSet
+
+SetDecHrHi:
+	LW t0,HrHiIncVal(Zero)
+	SUB s2,s2,t0; 2 decs to 1, 1 decs to 0, and the case where 0 might dec is already handled by checking for 00 in the last br
+	LW t0,HrLoMaxVal(Zero)
+	ADD s2,s2,t0; hr lo must be 0 if it reaches this point, so add 9
+	SW s2,s2,HEX(Zero)
+	BR UpdKeyTimerSet
 
 SetIncHrLo:
 	LW s2,HEX(Zero)
@@ -365,6 +396,15 @@ NotHrMax:
 	ADD s2,s2,t0; +1 hr
 	SW s2,HEX(Zero)
 	BR UpdKeyTimerSet
+
+SetIncHrHi:
+	LW t0,HrHiIncVal(Zero)
+	ADD s2,s2,t0; 0 incs to 1, 1 incs to 2, and the case where 2 might inc is already handled by checking for 23 in the last br
+	LW t0,HrLoMaxVal(Zero)
+	SUB s2,s2,t0; 23 should be handled, so hr lo must be 9, therefore -9 to zero
+	SW s2,HEX(Zero)
+	BR UpdKeyTimerSet
+
 
 
 SecsVal:

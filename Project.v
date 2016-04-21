@@ -90,12 +90,11 @@ module Project(
 	
 	 always @(posedge clk) begin
 		oldkey<=KEY;
-		//...bit 4 is ie? Does he mean bit 3? Is a bit just always 0? Should this just be 3 bits?
-		KCTL<={2'b0,key_overrun,key_ready};
+		KCTL<={2'b0,key_overrun,key_ready&((memaddr_M==ADDRKEY)&selmemout_M)};
 		KDATA<={key3press,key2press,key1press,key0press};
 		//read from KDATA sets ready bit to 0
-		if(memaddr_M==ADDRKEY && selmemout_M)
-			KCTL[0]<=1'b0;
+		//if(memaddr_M==ADDRKEY && selmemout_M)
+			//KCTL[0]<=1'b0;
 	  end
   
   // The reset signal comes from the reset button on the DE0-CV board
