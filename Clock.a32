@@ -3,8 +3,8 @@
 .NAME	LEDR=0xFFFFF020
 .NAME	KDATA= 0xFFFFF080
 .NAME	KCTL= 0xFFFFF084
-.NAME	SW=  0xFFFFF090
-.NAME	SWCTl= 0xFFFFF094
+.NAME	SDATA=  0xFFFFF090
+.NAME	SCTl= 0xFFFFF094
 .NAME TCNT=0xFFFFF100
 .NAME TLIM=0xFFFFF104
 .NAME TCTL=0xFFFFF108
@@ -38,6 +38,7 @@
 	ADDI a0,Zero,10
 	ADDI s0,Zero,0; ONE DENOTES CLOCK SET, ZERO DENOTES CLOCK DISP
 	SW a0,TLIM(Zero)
+	ADDI a0,Zero,0
 	LW t1,HrMaxVal(Zero)
 	ADD t0,Zero,t1; t0=23 hrs
 	LW t1,MinsMaxVal(Zero)
@@ -53,8 +54,9 @@ Disp:
 	ADDI a5,Zero,0
 	ADDI s5,Zero,200
 	ADDI a10,Zero,500
-ClockLoop:
+	SW Zero,LEDR(Zero)
 	ANDI s0,Zero,0; set mode to display
+ClockLoop:
 	LW a3,KDATA(Zero)
 	ANDI a3,a3,1; is 1 if key0 is being pressed
 
@@ -174,6 +176,10 @@ SetZero:
 ClockSet:
 	ANDI a5,Zero,0; set key timer counter back to 0
 	ADDI s0,Zero,1; set mode to cock set
+	ADDI t0,Zero,0
+	ADDI t1,Zero,0
+	ADDI t2,Zero,0
+	ADDI t3,Zero,0
 	ANDI t4,Zero,0
 	ANDI t6,Zero,0
 	ANDI t6,Zero,0
@@ -190,9 +196,8 @@ ClockSet:
 	ANDI s9,Zero,0
 	ANDI s10,Zero,0
 	ANDI s11,Zero,0
+	ADDI a12,Zero,50
 ClockSetLoop:
-	NOT t12,Zero
-	SW t12,LEDR(Zero)
 
 	AND s8,s4,t8; s8=key0 was the only key pressed last cycle and this cycle other keys were added
 	AND s9,s5,t9; s9=key1 was the only key pressed last cycle and this cycle other keys were added
@@ -259,6 +264,20 @@ UpdKeyTimerSet:
 	EQ a4,a13,a3; a4=1 if no key is being pressed
 	AND a4,a4,s1; a4=1 if no key is being pressed and if the timer has the ready bit set
 	ADD a5,a5,a4; increment key timer by 1 if no key is being pressed and the timer's ready bit is set
+
+	LW t0,SCTL(Zero)
+	ANDI t0,t0,1; check if switch ready bit is set
+	BNE t0,a1,ReadSw; don't update switch values if the ready bit is not set
+	LW t1,SDATA(Zero); grab switch values
+	SW Zero,SCTL(Zero)
+ReadSw:
+	EQ t3,t1,Zero; t3 is 1 if no switch is high, else it's 0
+	ADDI t0,Zero,0
+	BLE a0,a12,SwLedr; if not within the correct half second range, just keep LEDR's 0
+	NOT t0,t0
+SwLedr:
+	SW t0,LEDR(Zero); simply blink every 0.5 secs
+
 	BEQ a5,a10,Disp; go back to display mode if 5 seconds have passed without a keypress
 	BEQ a0,a2,IncSecLo; branch if we've counted 100 hundreths of a second
 	BR  ClockSetLoop
@@ -293,6 +312,59 @@ WrapMinHiDecr:
 	SUB s2,s2,t0; set secs to 0
 	SW s2,HEX(Zero)
 	BR UpdKeyTimerSet; let secs increment per normal
+
+SetIncMinLo:
+	LW s2,HEX(Zero)
+	LW t0,MinLoVal(Zero)
+	AND s3,s2,t0; grab the lower min digit
+	LW t0,MinLoMaxVal(Zero)
+	BEQ s3,t0,SetIncMinHi; if min lo is 9, decrement min hi
+	LW t0,MinLoIncVal(Zero)
+	ADD s2,s2,t0; +1 min
+	LW t0,SecsVal(Zero)
+	AND t0,s2,t0; grab seconds
+	SUB s2,s2,t0; set secs to 0
+	SW s2,HEX(Zero)
+	BR UpdKeyTimerSet; let secs increment per normal
+
+SetIncMinHi:
+	LW t0,MinLoMaxVal(Zero)
+	SUB s2,s2,t0; minutes must be 9, but we're incrementing, so -9 to make it 0
+	LW t0,MinHiVal(Zero)
+	AND s3,s2,t0; grab the higher min digit
+	LW t0,MinHiIncVal(Zero)
+	LW t1,MinHiMaxVal(Zero)
+	BNE s3,t1,WrapMinHiDecr; if min hi isn't 5, just increment, otherwise, we need to wrap the value
+	SUB s2,s2,t1; min hi must be 5, so set it to 0
+	BEQ Zero,Zero,SkipAdd
+WrapMinHiIncr:
+	ADD s2,s2,t0; +10 mins
+SkipAdd:
+	LW t0,SecsVal(Zero)
+	AND t0,s2,t0; grab seconds
+	SUB s2,s2,t0; set secs to 0
+	SW s2,HEX(Zero)
+	BR UpdKeyTimerSet; let secs increment per normal
+
+SetIncHrLo:
+	LW s2,HEX(Zero)
+	LW t0,HrLoVal(Zero)
+	LW t1,HirHiVal(Zero)
+	ADD t1,t0,t1
+	AND s3,s2,t1; grab both hour digits
+	LW t1,HrMaxVal(Zero)
+	BNE s3,t1,NotHrMax; branch if hours!=23
+	SUB s2,s2,t1; reset hours to 0
+	SW s2,HEX(Zero)
+	BR UpdKeyTimerSet
+NotHrMax:
+	AND s3,s2,t0; grab lower hr digit
+	LW t0,HrLoMaxVal(Zero)
+	BEQ s3,t0,SetIncHrHi; branch if hr lo digit is 9
+	LW t0,HrLoIncVal(Zero)
+	ADD s2,s2,t0; +1 hr
+	SW s2,HEX(Zero)
+	BR UpdKeyTimerSet
 
 
 SecsVal:
