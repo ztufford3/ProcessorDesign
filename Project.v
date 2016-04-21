@@ -28,7 +28,7 @@ module Project(
   parameter ADDRTCNT	=32'hFFFFF100;
   parameter ADDRTLIM	=32'hFFFFF104;
   parameter ADDRTCTL	=32'hFFFFF108;
-  parameter IMEMINITFILE="Clock.mif";
+  parameter IMEMINITFILE="Sorter3.mif";
   parameter IMEMADDRBITS=16;
   parameter IMEMWORDBITS=2;
   parameter IMEMWORDS=(1<<(IMEMADDRBITS-IMEMWORDBITS));
@@ -66,7 +66,7 @@ module Project(
   parameter OP2_NXOR =OP2_XOR|6'b001000;
   
   //clock frequency
-  parameter FREQ = 10'd96;
+  parameter FREQ = 10'd110;
   parameter MILLISEC = FREQ*24'd1000;
   
   parameter KCTLADDR = 32'hFFFFF084;
@@ -84,7 +84,7 @@ module Project(
 	reg [3:0] KDATA = 4'd0;
 	
 	//high if KDATA change is detected
-	wire key_ready=(KEY!=KDATA);
+	wire key_ready=((!KEY)!=KDATA);
 	//set high if ready is still 1 when KDATA changes
 	wire key_overrun=key_ready&&(KCTL[0]);
 	
@@ -116,17 +116,16 @@ module Project(
   reg [9:0] SDATA;
   reg [3:0] SCTL;
   //1 when a switch value changes
-  wire switch_ready=(SDATA!=SW);
+  //wire switch_ready=(SDATA!=SW);
   //if the switch value has changed, but ready is still high
-  wire switch_overrun=(switch_ready)&&(SDATA[0]);
+  //wire switch_overrun=(switch_ready)&&(SDATA[0]);
   //for interrupts. 0 for now
-  wire switch_control = 0;
   
   always @(posedge clk or posedge reset) begin
 	  if(reset)
 		switch_debouncer<=24'd0;
 	  else begin
-			if(switch_ready) //begin debouncing whenever any switch value changes and remains changed
+			if((SDATA!=SW)) //begin debouncing whenever any switch value changes and remains changed
 				switch_debouncer<=switch_debouncer+24'd1;
 			else //when value is stable, no need to debounce
 				switch_debouncer<=24'd0;
@@ -134,11 +133,11 @@ module Project(
 			//clear the ready bit
 			if(switch_debouncer>=(MILLISEC*24'd10)) begin
 				//wondering what's going on with bits #2 and #3 here as well
-				SCTL<={switch_control, 1'b0, switch_overrun, switch_ready};
+				SCTL<={2'b0, (SDATA!=SW)&&(SDATA[0]), (SDATA!=SW)};
 				SDATA<={SW};
 				switch_debouncer<=24'd0;
 			end else if(memaddr_M==ADDRSW && selmemout_M)
-				SDATA[0]<=1'b0;
+				SCTL[0]<=1'b0;
 		end
 	end
   

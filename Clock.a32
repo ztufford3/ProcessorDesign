@@ -4,7 +4,7 @@
 .NAME	KDATA= 0xFFFFF080
 .NAME	KCTL= 0xFFFFF084
 .NAME	SDATA=  0xFFFFF090
-.NAME	SCTl= 0xFFFFF094
+.NAME	SCTL= 0xFFFFF094
 .NAME TCNT=0xFFFFF100
 .NAME TLIM=0xFFFFF104
 .NAME TCTL=0xFFFFF108
@@ -44,8 +44,7 @@
 	LW t1,MinsMaxVal(Zero)
 	ADD t0,t0,t1; t0=23 hrs 59 mins
 	LW t1,SecHiMaxVal(Zero)
-	SUBI t1,t1,11
-	ADD t0,t0,t1; t0=23 hrs 59 mins 45 secs
+	ADD t0,t0,t1; t0=23 hrs 59 mins 50 secs
 	SW Zero,TCTL(Zero)
 	SW t0,HEX(Zero)
 Disp:
@@ -59,9 +58,6 @@ Disp:
 ClockLoop:
 	LW a3,KDATA(Zero)
 	ANDI a3,a3,1; is 1 if key0 is being pressed
-
-	GT t8,a5,Zero
-	SW t8,LEDR(Zero); turn on LEDR0 if the key timer goes beyond 0 secs (for debugging)
 
 	BEQ a3,a1,UpdKeyTimer ; branch if key0press==1
 	AND a5,a5,Zero; zero out key timer if key0 isn't being pressed
@@ -198,7 +194,10 @@ ClockSet:
 	ANDI s11,Zero,0
 	ADDI a12,Zero,50
 	ANDI a14,Zero,0
+	ANDI a15,Zero,0; will serve as a flag to keep the min from decrementing when releasing key0 upon entry
 ClockSetLoop:
+
+	ADD a15,a15,a6
 
 	AND s8,s4,t8; s8=key0 was the only key pressed last cycle and this cycle other keys were added
 	AND s9,s5,t9; s9=key1 was the only key pressed last cycle and this cycle other keys were added
@@ -245,7 +244,9 @@ ClockSetLoop:
 	NEQ t0,t11,t7; 1 if key3 isn't the only button being pressed (or may not be being pressed)
 	AND t11,t11,t0; 1 if key3 IS being pressed AND isn't the only one
 
+	GT a15,a15,Zero; effectively ignore the first key release on key0 since it's after we've just entered set mode
 	AND a6,a6,s8; key0 was the active button but was just released
+	AND a6,a6,a15; and this isn't the very first key release since we entered clock set mode
 	AND a7,a7,s9; key1 was the active button but was just released
 	AND a8,a8,s10; key2 was the active button but was just released
 	AND a9,a9,s11; key3 was the active button but was just released
@@ -353,7 +354,7 @@ SkipAdd:
 SetDecHrLo:
 	LW s2,HEX(Zero)
 	LW t0,HrLoVal(Zero)
-	LW t1,HirHiVal(Zero)
+	LW t1,HrHiVal(Zero)
 	ADD t1,t0,t1
 	AND s3,s2,t1; grab both hour digits
 	BNE s3,Zero,NotHrMin; branch if hours!=0
@@ -374,13 +375,13 @@ SetDecHrHi:
 	SUB s2,s2,t0; 2 decs to 1, 1 decs to 0, and the case where 0 might dec is already handled by checking for 00 in the last br
 	LW t0,HrLoMaxVal(Zero)
 	ADD s2,s2,t0; hr lo must be 0 if it reaches this point, so add 9
-	SW s2,s2,HEX(Zero)
+	SW s2,HEX(Zero)
 	BR UpdKeyTimerSet
 
 SetIncHrLo:
 	LW s2,HEX(Zero)
 	LW t0,HrLoVal(Zero)
-	LW t1,HirHiVal(Zero)
+	LW t1,HrHiVal(Zero)
 	ADD t1,t0,t1
 	AND s3,s2,t1; grab both hour digits
 	LW t1,HrMaxVal(Zero)
